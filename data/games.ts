@@ -38,7 +38,7 @@ export const games: GameMeta[] = [
   {
     slug: 'boid-swarm',
     title: 'Boid Swarm',
-    description: 'Up to 100,000 GPU-instanced boids driven by curl noise in a single draw call. Zero CPU per boid.',
+    description: 'Up to 100,000 GPU-instanced boids driven by curl noise in a single draw call — zero CPU per boid. (Capped at 10k on mobile for performance.)',
     tags: ['Three.js', 'GLSL', 'Instancing', 'GPU'],
     art: '⚡',
     engine: 'three',
