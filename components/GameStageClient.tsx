@@ -2,14 +2,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import ShaderPlayground from '@/components/ShaderPlayground';
 import type { Engine } from '@/data/games';
 
+// Chỉ GameStage cần dynamic vì nó import Phaser ở top-level
 const GameStage = dynamic(() => import('@/components/GameStage'), {
-  ssr: false,
-  loading: () => <div className="stage-loading">Loading…</div>,
-});
-
-const ShaderPlayground = dynamic(() => import('@/components/ShaderPlayground'), {
   ssr: false,
   loading: () => <div className="stage-loading">Loading…</div>,
 });
