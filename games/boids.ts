@@ -104,18 +104,16 @@ vec3 curlNoise(vec3 p) {
   const float e = 0.1;
   vec3 dx = vec3(e, 0.0, 0.0);
   vec3 dy = vec3(0.0, e, 0.0);
-  vec3 dz = vec3(0.0, 0.0, e);
 
+  // Chỉ dùng 2 trục → 4 vectorNoise calls (12 snoise)
   vec3 f1 = vectorNoise(p + dy);
   vec3 f2 = vectorNoise(p - dy);
-  vec3 f3 = vectorNoise(p + dz);
-  vec3 f4 = vectorNoise(p - dz);
-  vec3 f5 = vectorNoise(p + dx);
-  vec3 f6 = vectorNoise(p - dx);
+  vec3 f3 = vectorNoise(p + dx);
+  vec3 f4 = vectorNoise(p - dx);
 
-  float cx = (f1.z - f2.z - f3.y + f4.y) / (2.0 * e);
-  float cy = (f3.x - f4.x - f5.z + f6.z) / (2.0 * e);
-  float cz = (f5.y - f6.y - f1.x + f2.x) / (2.0 * e);
+  float cx = (f1.z - f2.z) / (2.0 * e);
+  float cy = 0.0;
+  float cz = (f3.y - f4.y) / (2.0 * e);
 
   return vec3(cx, cy, cz);
 }
@@ -310,13 +308,17 @@ export async function initBoidSwarm(
         antialias: false,
         powerPreference: 'high-performance',
     });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+        || window.innerWidth < 768;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.0 : 1.5));
     renderer.setSize(width, height);
     renderer.setClearColor(0x08080f, 1);
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x08080f, 0.055);
+    if (!isMobile) {
+        scene.fog = new THREE.FogExp2(0x08080f, 0.055);
+    }
 
     const camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 100);
     camera.position.set(0, 1.5, 9);
@@ -327,7 +329,7 @@ export async function initBoidSwarm(
     controls.enablePan = false;
     controls.minDistance = 3;
     controls.maxDistance = 20;
-    controls.autoRotate = true;
+    controls.autoRotate = !isMobile;
     controls.autoRotateSpeed = 0.4;
 
     const { geometry: baseGeo, texture } = await loadBoidAsset('/models/fish.glb');
