@@ -1245,3 +1245,20 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* Đảm bảo container không bị set height cứng */
+.shader-viewport {
+  position: relative;
+  width: 100%;
+  background: #08080f;
+  overflow: hidden;
+  /* Bỏ aspect-ratio, min-height, height */
+}
+
+/* Canvas tự scale */
+.shader-viewport canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}

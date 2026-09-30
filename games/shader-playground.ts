@@ -261,14 +261,33 @@ export async function initShaderPlayground(
     };
     animate();
 
+    // Mới
     const onResize = () => {
         const w = container.clientWidth;
         const h = container.clientHeight;
+        if (w === 0 || h === 0) return;
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
+        renderer.setSize(w, h, false);   // ⭐ updateStyle=false
+        renderer.domElement.style.width = '100%';
+        renderer.domElement.style.height = '100%';
     };
+
+    // ResizeObserver — quan trọng nhất cho mobile
+    const ro = new ResizeObserver(onResize);
+    ro.observe(container);
+
+    // Fallbacks
     window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+
+    // Re-scale sau boot (mobile layout thường chưa final ở lần đầu)
+    setTimeout(onResize, 50);
+    setTimeout(onResize, 200);
+    setTimeout(onResize, 600);
+
+    // Chạy lần đầu ngay
+    onResize();
 
     return {
         setParam: (key, value) => {
@@ -298,18 +317,17 @@ export async function initShaderPlayground(
         },
         destroy: () => {
             cancelAnimationFrame(raf);
+            ro.disconnect();
             window.removeEventListener('resize', onResize);
+            window.removeEventListener('orientationchange', onResize);
             controls.dispose();
             geo.dispose();
             material.dispose();
             outlineMat.dispose();
             texture.dispose();
             renderer.dispose();
-
-            // Kiểm tra parent trước khi remove
-            const canvas = renderer.domElement;
-            if (canvas.parentNode) {
-                canvas.parentNode.removeChild(canvas);
+            if (renderer.domElement.parentNode) {
+                renderer.domElement.parentNode.removeChild(renderer.domElement);
             }
         },
     };
