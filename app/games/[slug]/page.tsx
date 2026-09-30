@@ -36,6 +36,7 @@ export default async function GamePage({
         {game.slug === 'flappy' && '⌨ SPACE / Click to flap'}
         {game.slug === 'tower-defense' && '🖱 Click to place towers · SPACE to start wave'}
         {game.slug === 'proc-gen' && '🖱 Adjust sliders · Click Regenerate for a new map'}
+        {game.slug === 'arrow-puzzle' && '🖱 Tap an arrow · Clear all arrows to win'}
       </div>
     </main>
   );

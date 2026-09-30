@@ -8,7 +8,7 @@ export default function GameCard({ slug, title, description, tags, art }: GameMe
       <div className="card-cover">
         <div className="card-art">{art}</div>
         <div className="card-overlay">
-          <span className="play-indicator">▶ Chơi ngay</span>
+          <span className="play-indicator">▶ Play now</span>
         </div>
       </div>
       <div className="card-info">

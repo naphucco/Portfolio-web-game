@@ -12,20 +12,28 @@ export interface GameMeta {
 
 export const games: GameMeta[] = [
   {
-    slug: 'flappy',
-    title: 'Flappy Neon',
-    description: 'Tap to fly and weave through the pillars. One button, infinite attempts.',
-    tags: ['Phaser 3', 'One-button'],
-    art: '◆',
-    engine: 'phaser',
-  },
-  {
     slug: 'shader-playground',
     title: 'Shader Playground',
     description: 'Interactive 3D scene with custom GLSL toon, glow, outline, and wind shaders — tweak parameters in realtime.',
     tags: ['Three.js', 'GLSL', 'Shaders'],
     art: '◈',
     engine: 'three',
+  },
+  {
+    slug: 'arrow-puzzle',
+    title: 'Arrow Out Puzzle',
+    description: 'Tap arrows to send them flying off the grid. Every level is procedurally generated and guaranteed solvable.',
+    tags: ['Phaser 3', 'Puzzle', 'Procedural'],
+    art: '→',
+    engine: 'phaser',
+  },
+  {
+    slug: 'flappy',
+    title: 'Flappy Neon',
+    description: 'Tap to fly and weave through the pillars. One button, infinite attempts.',
+    tags: ['Phaser 3', 'One-button'],
+    art: '◆',
+    engine: 'phaser',
   },
 ];
 

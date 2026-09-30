@@ -3,9 +3,9 @@
 
 import dynamic from 'next/dynamic';
 import ShaderPlayground from '@/components/ShaderPlayground';
+import ArrowPuzzle from '@/components/ArrowPuzzle';
 import type { Engine } from '@/data/games';
 
-// Chỉ GameStage cần dynamic vì nó import Phaser ở top-level
 const GameStage = dynamic(() => import('@/components/GameStage'), {
   ssr: false,
   loading: () => <div className="stage-loading">Loading…</div>,
@@ -18,8 +18,7 @@ export default function GameStageClient({
   engine: Engine;
   slug: string;
 }) {
-  if (slug === 'shader-playground') {
-    return <ShaderPlayground />;
-  }
+  if (slug === 'shader-playground') return <ShaderPlayground />;
+  if (slug === 'arrow-puzzle') return <ArrowPuzzle />;
   return <GameStage engine={engine} slug={slug} />;
 }
