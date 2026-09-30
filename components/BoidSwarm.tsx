@@ -12,7 +12,7 @@ const DEFAULT_PARAMS: BoidParams = {
 };
 
 const MAX_COUNT_DESKTOP = 100000;
-const MAX_COUNT_MOBILE = 5000;
+const MAX_COUNT_MOBILE = 10000;
 
 export default function BoidSwarm() {
   const containerRef = useRef<HTMLDivElement>(null);
