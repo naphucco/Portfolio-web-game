@@ -35,6 +35,14 @@ export const games: GameMeta[] = [
     art: '◆',
     engine: 'phaser',
   },
+  {
+    slug: 'boid-swarm',
+    title: 'Boid Swarm',
+    description: 'Up to 100,000 GPU-instanced boids driven by curl noise in a single draw call. Zero CPU per boid.',
+    tags: ['Three.js', 'GLSL', 'Instancing', 'GPU'],
+    art: '⚡',
+    engine: 'three',
+  },
 ];
 
 export function getGameBySlug(slug: string): GameMeta | undefined {
