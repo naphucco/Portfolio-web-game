@@ -9,7 +9,7 @@ export default function Nav() {
           <span className="logo-dot" /> ANPHUC.DEV
         </Link>
         <ul className="nav-links">
-          <li><Link href="/about">Giới thiệu</Link></li>
+          <li><Link href="/">About</Link></li>
           <li><Link href="/games">Games</Link></li>
           <li><Link href="/blog">Blog</Link></li>
         </ul>

@@ -8,9 +8,9 @@ export default function BlogPage() {
   return (
     <main className="page-container">
       <p className="eyebrow">Blog</p>
-      <h1>Bài viết &amp; chia sẻ</h1>
+      <h1>Articles &amp; Notes</h1>
       <p className="lead">
-        Ghi chú về game dev, tối ưu hiệu năng, và những thứ mình học được trong quá trình làm game.
+        Notes on game dev, performance optimization, and lessons learned while building games.
       </p>
 
       <div className="posts-grid">

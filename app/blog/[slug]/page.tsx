@@ -20,7 +20,7 @@ export default async function PostPage({
 
   return (
     <main className="page-container">
-      <Link href="/blog" className="back-link">← Tất cả bài viết</Link>
+      <Link href="/blog" className="back-link">← All articles</Link>
 
       <header className="post-header">
         <p className="post-date">{post.date}</p>

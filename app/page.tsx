@@ -3,8 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Giới thiệu — Nguyen An Phuc',
-  description: 'Game Developer 10 năm kinh nghiệm: Unity, Cocos Creator, gameplay systems, tối ưu mobile.',
+  title: 'About — Nguyen An Phuc',
+  description: 'Game Developer with 10 years of experience: Unity, Cocos Creator, gameplay systems, mobile optimization.',
 };
 
 export default function AboutPage() {
@@ -25,8 +25,8 @@ export default function AboutPage() {
           <p className="eyebrow">Game Developer</p>
           <h1>Nguyen An Phuc</h1>
           <p className="lead">
-            <strong>10 năm</strong> lập trình phần mềm — trong đó <strong>5 năm chuyên sâu về game</strong>.
-            Thế mạnh: Unity (C#), Cocos Creator, gameplay systems, custom shader và tối ưu hiệu năng mobile.
+            <strong>10 years</strong> in software engineering — including <strong>5 years specializing in game development</strong>.
+            Strong in Unity (C#), Cocos Creator, gameplay systems, custom shaders, and mobile performance optimization.
           </p>
           <div className="cta-row">
             <a
@@ -35,16 +35,16 @@ export default function AboutPage() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              📄 Tải CV (PDF)
+              📄 Download CV (PDF)
             </a>
             <Link href="/games" className="btn btn-ghost">
-              🎮 Xem demo
+              🎮 View demos
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ===== LIÊN HỆ NHANH ===== */}
+      {/* ===== QUICK CONTACT ===== */}
       <section className="about-contact">
         <a href="mailto:nguyenanphuc92@gmail.com" className="contact-link">
           <span className="k">EMAIL</span> nguyenanphuc92@gmail.com
@@ -70,9 +70,9 @@ export default function AboutPage() {
         </a>
       </section>
 
-      {/* ===== KỸ NĂNG ===== */}
+      {/* ===== SKILLS ===== */}
       <section className="about-section">
-        <h2 className="section-title">Kỹ năng chính</h2>
+        <h2 className="section-title">Core Skills</h2>
 
         <div className="skills-group">
           <div className="skill-block">
@@ -96,7 +96,7 @@ export default function AboutPage() {
           <div className="skill-block">
             <h3>⚙️ Gameplay &amp; Systems</h3>
             <div className="skills">
-              {['Casual/Puzzle', 'Realtime Strategy', 'Card Game', 'AI / A* / NavMesh', 'DOTween', 'Mobile Optimization'].map((s) => (
+              {['Casual / Puzzle', 'Realtime Strategy', 'Card Game', 'AI / A* / NavMesh', 'DOTween', 'Mobile Optimization'].map((s) => (
                 <span key={s} className="skill">{s}</span>
               ))}
             </div>
@@ -112,7 +112,7 @@ export default function AboutPage() {
           </div>
 
           <div className="skill-block">
-            <h3>🛠 Tools khác</h3>
+            <h3>🛠 Other Tools</h3>
             <div className="skills">
               {['Git', 'Agile / Scrum', 'Angular', 'TypeScript', 'HTML5 / CSS3'].map((s) => (
                 <span key={s} className="skill">{s}</span>
@@ -122,9 +122,9 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ===== KINH NGHIỆM ===== */}
+      {/* ===== EXPERIENCE ===== */}
       <section className="about-section">
-        <h2 className="section-title">Kinh nghiệm làm việc</h2>
+        <h2 className="section-title">Work Experience</h2>
 
         <div className="timeline">
           {/* Job 1 */}
@@ -133,13 +133,13 @@ export default function AboutPage() {
             <div className="timeline-content">
               <div className="timeline-head">
                 <h3>Remote Game Developer</h3>
-                <span className="timeline-date">01/2026 — Hiện tại</span>
+                <span className="timeline-date">01/2026 — Present</span>
               </div>
               <p className="timeline-company">Client (Canada) · Online Realtime Card Game</p>
               <ul>
-                <li>Phát triển game đánh bài multiplayer bằng Cocos Creator 2 + Pomelo framework.</li>
-                <li>Xây dựng core game logic, card mechanics, đồng bộ state realtime client ↔ server.</li>
-                <li>Tối ưu hiệu năng mobile và UI responsiveness cho gameplay online mượt mà.</li>
+                <li>Built an online multiplayer card game using Cocos Creator 2 + Pomelo framework.</li>
+                <li>Implemented core game logic, card mechanics, and realtime state sync between client and server.</li>
+                <li>Optimized mobile performance and UI responsiveness for smooth online gameplay.</li>
               </ul>
             </div>
           </article>
@@ -154,10 +154,10 @@ export default function AboutPage() {
               </div>
               <p className="timeline-company">New Studio · Mobile Casual &amp; Puzzle</p>
               <ul>
-                <li>Phát triển nhiều game Casual/Puzzle: Restaurant Management, Cover Shooter, Wave Defense.</li>
-                <li>Xây dựng gameplay loop, AI địch, reward system, UI flow bằng Unity (C#) + OOP.</li>
-                <li>Dùng DOTween cho animation và A*/NavMesh cho di chuyển địch.</li>
-                <li>Tích hợp Firebase Auth + Realtime DB để sync player data và save/load tiến trình.</li>
+                <li>Developed multiple Casual/Puzzle games: Restaurant Management, Cover Shooter, Wave Defense.</li>
+                <li>Built gameplay loops, enemy AI, reward systems, and UI flow with Unity (C#) and OOP principles.</li>
+                <li>Used DOTween for animation and A*/NavMesh for enemy movement and unit pathing.</li>
+                <li>Integrated Firebase Auth + Realtime DB for player data sync and save/load progression.</li>
               </ul>
             </div>
           </article>
@@ -170,12 +170,12 @@ export default function AboutPage() {
                 <h3>Unity3D Developer &amp; Frontend</h3>
                 <span className="timeline-date">2023 — 2024</span>
               </div>
-              <p className="timeline-company">SaaS &amp; Interactive 3D · Thị trường Na Uy</p>
+              <p className="timeline-company">SaaS &amp; Interactive 3D · Norwegian Market</p>
               <ul>
-                <li>Phát triển ứng dụng 3D tương tác trên mobile với UI phức tạp và môi trường 3D.</li>
-                <li>Dẫn dắt frontend B2B platform bằng Angular, viết Unit Test đảm bảo độ tin cậy.</li>
-                <li>Xây dựng thư viện component tái sử dụng, giảm 50% thời gian dev UI.</li>
-                <li>Refactor dashboard: giảm load time từ 120s xuống dưới 3s.</li>
+                <li>Developed an interactive 3D mobile application with complex UI systems and 3D environments.</li>
+                <li>Led frontend architecture of a B2B platform using Angular; wrote unit tests for reliability.</li>
+                <li>Built reusable component libraries, reducing UI development time by 50%.</li>
+                <li>Refactored core dashboard, cutting load time from 120s down to under 3s.</li>
               </ul>
               <a
                 href="https://www.ekonect.no/"
@@ -196,11 +196,11 @@ export default function AboutPage() {
                 <h3>Frontend Developer</h3>
                 <span className="timeline-date">07/2020 — 01/2023</span>
               </div>
-              <p className="timeline-company">FPT Software · Enterprise Solutions (Nhật Bản)</p>
+              <p className="timeline-company">FPT Software · Enterprise Solutions (Japan)</p>
               <ul>
-                <li>Dẫn dắt migration hệ thống HR lớn từ Java JSP sang Angular 14, tăng 40% user engagement.</li>
-                <li>Viết SQL procedures sinh dataset lớn để stress test production.</li>
-                <li>Cấu hình cronjobs tự động hoá xử lý tác vụ.</li>
+                <li>Led migration of a large-scale HR system from legacy Java JSP to Angular 14, boosting user engagement by 40%.</li>
+                <li>Wrote complex SQL procedures to generate bulk datasets for production stress testing.</li>
+                <li>Configured cronjobs for automated task processing.</li>
               </ul>
             </div>
           </article>
@@ -215,11 +215,11 @@ export default function AboutPage() {
               </div>
               <p className="timeline-company">Supermassy Game · Mobile Strategy</p>
               <ul>
-                <li>Thiết kế &amp; code game chiến thuật pixel art bằng Unity + C#.</li>
-                <li>Dùng Odin Inspector mở rộng Unity Editor, tối ưu workflow cho level designer.</li>
+                <li>Designed and coded pixel-art strategy games in Unity + C#.</li>
+                <li>Extended Unity Editor tools with Odin Inspector, streamlining workflow for level designers.</li>
                 <li>
-                  Viết core gameplay cho <strong>Monsters War</strong> — sau đó được publisher RedAntz mua lại
-                  và đạt <strong>hàng triệu lượt tải</strong> trên Google Play.
+                  Wrote core gameplay for <strong>Monsters War</strong> — later acquired by publisher RedAntz
+                  and reached <strong>millions of downloads</strong> on Google Play.
                 </li>
               </ul>
               <div className="timeline-links">
@@ -229,7 +229,7 @@ export default function AboutPage() {
                   rel="noopener noreferrer"
                   className="timeline-link"
                 >
-                  📱 Monsters War trên Google Play
+                  📱 Monsters War on Google Play
                 </a>
                 <a
                   href="https://www.facebook.com/supermassygame"
@@ -245,9 +245,9 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ===== DỰ ÁN TIÊU BIỂU (có ảnh) ===== */}
+      {/* ===== FEATURED PROJECTS ===== */}
       <section className="about-section">
-        <h2 className="section-title">Dự án tiêu biểu</h2>
+        <h2 className="section-title">Featured Projects</h2>
 
         <div className="projects-grid">
           <article className="project-card">
@@ -261,7 +261,7 @@ export default function AboutPage() {
             </div>
             <div className="project-info">
               <h3>Monsters War</h3>
-              <p>Mobile Strategy · Unity · Hàng triệu lượt tải trên Google Play</p>
+              <p>Mobile Strategy · Unity · Millions of downloads on Google Play</p>
             </div>
           </article>
 
@@ -276,7 +276,7 @@ export default function AboutPage() {
             </div>
             <div className="project-info">
               <h3>Online Realtime Card Game</h3>
-              <p>Multiplayer · Cocos Creator 2 + Pomelo · Đồng bộ state realtime</p>
+              <p>Multiplayer · Cocos Creator 2 + Pomelo · Realtime state sync</p>
             </div>
           </article>
 
@@ -291,15 +291,15 @@ export default function AboutPage() {
             </div>
             <div className="project-info">
               <h3>Interactive 3D Mobile App</h3>
-              <p>Unity3D · UI phức tạp · Tương tác 3D model mượt mà</p>
+              <p>Unity3D · Complex UI · Smooth 3D model interaction</p>
             </div>
           </article>
         </div>
       </section>
 
-      {/* ===== HỌC VẤN ===== */}
+      {/* ===== EDUCATION ===== */}
       <section className="about-section">
-        <h2 className="section-title">Học vấn &amp; Ngoại ngữ</h2>
+        <h2 className="section-title">Education &amp; Languages</h2>
         <div className="edu-grid">
           <div className="edu-card">
             <h3>🎓 Vocational Diploma in IT</h3>
@@ -307,21 +307,21 @@ export default function AboutPage() {
           </div>
           <div className="edu-card">
             <h3>🌐 English</h3>
-            <p>Professional working proficiency — đọc tài liệu kỹ thuật, giao tiếp hàng ngày, họp nhóm.</p>
+            <p>Professional working proficiency — technical documentation, daily communication, team meetings.</p>
           </div>
         </div>
       </section>
 
-      {/* ===== LIÊN HỆ CUỐI ===== */}
+      {/* ===== CONTACT CTA ===== */}
       <section className="about-section about-cta">
-        <h2 className="section-title">Cùng làm gì đó vui vẻ</h2>
+        <h2 className="section-title">Let's build something fun</h2>
         <p className="lead">
-          Mình đang tìm cơ hội freelance hoặc vị trí Game Developer. Nếu bạn cần prototype,
-          hoặc chỉ muốn trao đổi về game — cứ nhắn nhé.
+          I'm open to freelance opportunities and Game Developer roles. If you need a prototype,
+          or just want to talk games — drop me a message.
         </p>
         <div className="cta-row">
           <a href="mailto:nguyenanphuc92@gmail.com" className="btn btn-primary">
-            ✉️ Gửi email
+            ✉️ Send email
           </a>
           <a
             href="https://linkedin.com/in/anphucnguyen"

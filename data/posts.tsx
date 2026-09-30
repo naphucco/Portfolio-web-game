@@ -16,9 +16,9 @@ export type Post = {
 export const posts: Post[] = [
   {
     slug: 'game-optimization',
-    title: 'Game Performance Optimization: Bạn Không Cần Model Phức Tạp',
+    title: "Game Performance Optimization: You Don't Need Complex Models",
     excerpt:
-      'Sprite Sheet, Billboarding và Particle System — 3 kỹ thuật đơn giản giữ game mobile 60 FPS mà vẫn đẹp mắt.',
+      'Sprite Sheets, Billboarding, and Particle Systems — 3 simple techniques to keep mobile games at 60 FPS while still looking great.',
     date: '2026-01-15',
     tags: ['Optimization', 'Mobile', 'VFX'],
     cover: '/blog/game-optimization1.jpg',
@@ -26,8 +26,8 @@ export const posts: Post[] = [
   },
   {
     slug: 'placeholder',
-    title: 'Bài viết sắp ra mắt',
-    excerpt: 'Nội dung đang được chuẩn bị. Quay lại sau nhé!',
+    title: 'Coming Soon',
+    excerpt: 'Content is being prepared. Check back later!',
     date: '2026-02-01',
     tags: ['Coming soon'],
     cover: '/blog/placeholder.jpg',
