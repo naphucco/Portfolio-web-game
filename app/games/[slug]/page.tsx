@@ -19,7 +19,7 @@ export default async function GamePage({
 
   return (
     <main className="page-container">
-      <Link href="/games" className="back-link">← Tất cả game</Link>
+      <Link href="/games" className="back-link">← All games</Link>
 
       <header className="game-header">
         <h1>{game.title}</h1>
@@ -29,13 +29,13 @@ export default async function GamePage({
         </div>
       </header>
 
-      {/* Dùng wrapper client */}
       <GameStageClient engine={game.engine} slug={game.slug} />
 
       <div className="game-hint">
-        {game.slug === 'dodge' && '⌨ ← → hoặc A/D · SPACE để chơi lại'}
-        {game.slug === 'flappy' && '⌨ SPACE / Click để bay'}
-        {game.slug === 'cube3d' && '🖱 Kéo chuột để xoay khối'}
+        {game.slug === 'shader-playground' && '🖱 Drag to rotate · Sliders on the right to tweak shaders'}
+        {game.slug === 'flappy' && '⌨ SPACE / Click to flap'}
+        {game.slug === 'tower-defense' && '🖱 Click to place towers · SPACE to start wave'}
+        {game.slug === 'proc-gen' && '🖱 Adjust sliders · Click Regenerate for a new map'}
       </div>
     </main>
   );

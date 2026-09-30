@@ -9,9 +9,7 @@ type Props = {
   slug: string;
 };
 
-// Map slug → hàm import game (lazy, chỉ tải khi gọi)
 const PHASER_SCENES: Record<string, () => Promise<{ default: any }>> = {
-  dodge:  () => import('@/games/dodge').then((m) => ({ default: m.DodgeScene })),
   flappy: () => import('@/games/flappy').then((m) => ({ default: m.FlappyScene })),
 };
 
@@ -32,7 +30,7 @@ export default function GameStage({ engine, slug }: Props) {
         if (engine === 'phaser') {
           const Phaser = (await import('phaser')).default;
           const SceneLoader = PHASER_SCENES[slug];
-          if (!SceneLoader) throw new Error(`Không có scene cho slug: ${slug}`);
+          if (!SceneLoader) throw new Error(`No scene for slug: ${slug}`);
 
           const { default: Scene } = await SceneLoader();
           if (cancelled || !containerRef.current) return;
@@ -51,13 +49,9 @@ export default function GameStage({ engine, slug }: Props) {
           });
 
           cleanupRef.current = () => game.destroy(true);
-        } else if (engine === 'three') {
-          const mod = await import('@/games/cube3d');
-          if (cancelled || !containerRef.current) return;
-          cleanupRef.current = mod.initCube3D(containerRef.current);
         }
       } catch (err) {
-        console.error('Lỗi tải game:', err);
+        console.error('Failed to load game:', err);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -80,13 +74,13 @@ export default function GameStage({ engine, slug }: Props) {
       {!playing && (
         <div className="cover" onClick={() => setPlaying(true)}>
           <div className="cover-art">▶</div>
-          <button className="play-btn">Chơi ngay</button>
+          <button className="play-btn">Play now</button>
         </div>
       )}
 
       {loading && (
         <div className="loading">
-          <span className="spinner" /> Đang tải engine…
+          <span className="spinner" /> Loading engine…
         </div>
       )}
 
@@ -94,7 +88,7 @@ export default function GameStage({ engine, slug }: Props) {
         <button
           className="stop-btn"
           onClick={() => setPlaying(false)}
-          title="Dừng"
+          title="Stop"
         >
           ✕
         </button>

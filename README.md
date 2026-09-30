@@ -28,9 +28,7 @@ portfolio/
 │   ├── GameCard.tsx
 │   └── GameStage.tsx
 ├── games/
-│   ├── dodge.ts
 │   ├── flappy.ts
-│   └── cube3d.ts
 ├── content/
 │   └── blog/
 │       ├── game-optimization.tsx

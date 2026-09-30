@@ -52,7 +52,7 @@ export class FlappyScene extends Phaser.Scene {
       fontFamily: 'monospace', fontSize: '22px', color: '#7ef9ff',
     });
 
-    this.hint = this.add.text(320, 190, 'Nhấn SPACE hoặc Click để bay', {
+    this.hint = this.add.text(320, 190, 'Press SPACE or Click to fly', {
       fontFamily: 'monospace', fontSize: '15px', color: '#8a8aa8',
     }).setOrigin(0.5);
 
@@ -141,10 +141,10 @@ export class FlappyScene extends Phaser.Scene {
     this.add.text(320, 142, 'GAME OVER', {
       fontFamily: 'monospace', fontSize: '30px', color: '#ff2e88',
     }).setOrigin(0.5);
-    this.add.text(320, 190, 'Điểm: ' + this.score, {
+    this.add.text(320, 190, 'Score: ' + this.score, {
       fontFamily: 'monospace', fontSize: '18px', color: '#ffffff',
     }).setOrigin(0.5);
-    this.add.text(320, 226, 'Nhấn SPACE / Click để chơi lại', {
+    this.add.text(320, 226, 'Press SPACE / Click to play again', {
       fontFamily: 'monospace', fontSize: '14px', color: '#8a8aa8',
     }).setOrigin(0.5);
   }
