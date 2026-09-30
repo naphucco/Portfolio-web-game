@@ -10,26 +10,37 @@ pnpm dev
 bun dev
 ```
 
+npm run build => check lỗi trước khi deploy vercel
+
 portfolio/
 ├── app/
-│   ├── layout.jsx              # Layout chung
-│   ├── page.jsx                # Trang chủ
-│   ├── about/page.jsx
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── about/page.tsx
 │   ├── games/
-│   │   ├── page.jsx            # Grid game
-│   │   └── [slug]/page.jsx     # Chơi game
+│   │   ├── page.tsx
+│   │   └── [slug]/page.tsx
 │   └── blog/
-│       ├── page.jsx            # Danh sách
-│       └── [slug]/page.jsx     # Bài viết (MDX)
+│       ├── page.tsx
+│       └── [slug]/page.tsx
 ├── components/
-│   ├── Nav.jsx
-│   ├── GameCard.jsx
-│   └── GameStage.jsx           # 'use client' + lazy-load engine
+│   ├── Nav.tsx
+│   ├── GameCard.tsx
+│   └── GameStage.tsx
 ├── games/
-│   ├── dodge.js
-│   ├── flappy.js
-│   └── cube3d.js
+│   ├── dodge.ts
+│   ├── flappy.ts
+│   └── cube3d.ts
 ├── content/
-│   └── blog/*.mdx
-├── public/models/
-└── next.config.js
+│   └── blog/
+│       ├── game-optimization.tsx
+│       └── placeholder.tsx
+├── data/
+│   ├── games.ts
+│   └── posts.ts
+├── public/
+│   ├── models/
+│   └── blog/
+│       ├── game-optimization.jpg
+│       └── placeholder.jpg
+└── next.config.ts
