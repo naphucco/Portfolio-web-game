@@ -27,6 +27,7 @@ export default function AboutPage() {
           <p className="lead">
             <strong>10 years</strong> in software engineering — including <strong>5 years specializing in game development</strong>.
             Strong in Unity (C#), Cocos Creator, gameplay systems, custom shaders, and mobile performance optimization.
+            Also comfortable with <strong>HTML/CSS</strong> and a bit of <strong>realtime backend &amp; databases</strong> (Firebase, Pomelo, SQL).
           </p>
           <div className="cta-row">
             <a

@@ -6,7 +6,12 @@ import type { Engine } from '@/data/games';
 
 const GameStage = dynamic(() => import('@/components/GameStage'), {
   ssr: false,
-  loading: () => <div className="stage-loading">Đang tải…</div>,
+  loading: () => <div className="stage-loading">Loading…</div>,
+});
+
+const ShaderPlayground = dynamic(() => import('@/components/ShaderPlayground'), {
+  ssr: false,
+  loading: () => <div className="stage-loading">Loading…</div>,
 });
 
 export default function GameStageClient({
@@ -16,5 +21,8 @@ export default function GameStageClient({
   engine: Engine;
   slug: string;
 }) {
+  if (slug === 'shader-playground') {
+    return <ShaderPlayground />;
+  }
   return <GameStage engine={engine} slug={slug} />;
 }

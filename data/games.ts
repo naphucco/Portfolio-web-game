@@ -35,6 +35,14 @@ export const games: GameMeta[] = [
     art: '◼',
     engine: 'three',
   },
+  {
+    slug: 'shader-playground',
+    title: 'Shader Playground',
+    description: 'Interactive 3D scene with custom GLSL toon, glow, outline, and wind shaders — tweak parameters in realtime.',
+    tags: ['Three.js', 'GLSL', 'Shaders'],
+    art: '◈',
+    engine: 'three',
+  },
 ];
 
 export function getGameBySlug(slug: string): GameMeta | undefined {
