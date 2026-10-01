@@ -15,6 +15,12 @@ export type BattleCityParams = {
     moveSpeed: number;
 };
 
+export type BattleCityCallbacks = {
+    onPlayerHpChange?: (hp: number, max: number) => void;
+    onEnemyCountChange?: (alive: number, total: number) => void;
+    onGameOver?: (win: boolean) => void;
+};
+
 export type BattleCityHandle = {
     setParam: <K extends keyof BattleCityParams>(key: K, value: BattleCityParams[K]) => void;
     destroy: () => void;
@@ -25,25 +31,29 @@ const CELL = 1;
 const TANK_RADIUS = 0.35;
 const CAMERA_OFFSET = new THREE.Vector3(9, 11, 9);
 
-// Bullet
 const BULLET_SPEED = 9;
 const BULLET_RADIUS = 0.12;
 const BULLET_LIFETIME = 2.0;
 const FIRE_COOLDOWN = 0.35;
 const BULLET_POOL_SIZE = 32;
 
-// Wall
 const BRICK_HP = 2;
 const FLASH_DURATION = 0.12;
 const FLASH_EMISSIVE = 0xffffff;
 const FLASH_INTENSITY = 3.0;
 
-// Enemy
 const ENEMY_SPEED = 2.2;
 const ENEMY_HP = 2;
 const ENEMY_FIRE_COOLDOWN = 1.2;
-const ENEMY_MOVE_DURATION = 0.6;    // mỗi lần đi 1 ô, dừng 0.6s rồi đi tiếp
-const ENEMY_PATH_RECOMPUTE = 0.5;   // recompute path mỗi 0.5s
+const ENEMY_MOVE_DURATION = 0.6;
+const ENEMY_PATH_RECOMPUTE = 0.5;
+
+const PLAYER_MAX_HP = 4;
+const PLAYER_FLASH_DURATION = 0.4;
+
+const MAX_ENEMIES = 7;
+const SPAWN_INTERVAL = 4.0;
+const SPAWN_START_DELAY = 1.5;
 
 const MAP_TEMPLATE: number[][] = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -91,7 +101,7 @@ type Enemy = {
     lastRecomputeTime: number;
     lastPathVersion: number;
     lastFireTime: number;
-    moveTimer: number;      // dừng giữa các bước
+    moveTimer: number;
     moving: boolean;
 };
 
@@ -132,7 +142,6 @@ async function loadTank(url: { body: string; tower: string; gun: string }): Prom
     ]);
 
     const root = new THREE.Group();
-
     const body = normalizeModel(bodyModel, 0.9);
     root.add(body);
 
@@ -159,13 +168,13 @@ async function loadTank(url: { body: string; tower: string; gun: string }): Prom
 
 export function initBattleCity(
     container: HTMLElement,
-    initial: BattleCityParams
+    initial: BattleCityParams,
+    callbacks: BattleCityCallbacks = {}
 ): { ready: Promise<BattleCityHandle> } {
     const ready = (async (): Promise<BattleCityHandle> => {
         const width = container.clientWidth;
         const height = container.clientHeight;
 
-        // ===== RENDERER =====
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         renderer.setSize(width, height);
@@ -174,7 +183,6 @@ export function initBattleCity(
         renderer.shadowMap.type = THREE.PCFShadowMap;
         container.appendChild(renderer.domElement);
 
-        // ===== SCENE =====
         const scene = new THREE.Scene();
         scene.fog = new THREE.Fog(0x0a0a14, 18, 32);
 
@@ -183,10 +191,8 @@ export function initBattleCity(
         worldGroup.rotation.y = camYaw;
         scene.add(worldGroup);
 
-        // ===== CAMERA =====
         const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
 
-        // ===== LIGHTS =====
         scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
         const sun = new THREE.DirectionalLight(0xffffff, 1.1);
@@ -203,7 +209,6 @@ export function initBattleCity(
         rim.position.set(-5, 4, -5);
         scene.add(rim);
 
-        // ===== GROUND =====
         const groundGeo = new THREE.PlaneGeometry(MAP_SIZE, MAP_SIZE);
         const groundMat = new THREE.MeshStandardMaterial({
             color: 0x14141e, roughness: 0.95, metalness: 0.05,
@@ -217,7 +222,6 @@ export function initBattleCity(
         grid.position.y = 0.001;
         worldGroup.add(grid);
 
-        // ===== WALLS =====
         const half = MAP_SIZE / 2;
         const wallGeo = new THREE.BoxGeometry(CELL * 0.95, 0.7, CELL * 0.95);
 
@@ -239,7 +243,6 @@ export function initBattleCity(
             Array(MAP_SIZE).fill(null)
         );
 
-        // ⭐ Track wall version — enemy dùng để biết khi nào cần recompute path
         let wallVersion = 0;
 
         for (let r = 0; r < MAP_SIZE; r++) {
@@ -276,11 +279,25 @@ export function initBattleCity(
         tankPivot.position.set(0, 0, half - 1.5);
         worldGroup.add(tankPivot);
 
-        let playerHp = 3;
+        let playerHp = PLAYER_MAX_HP;
         let playerAlive = true;
+        let playerFlashUntil = 0;
+        let gameEnded = false;
 
-        // ===== ENEMY =====
+        callbacks.onPlayerHpChange?.(playerHp, PLAYER_MAX_HP);
+        callbacks.onEnemyCountChange?.(0, MAX_ENEMIES);
+
+        // ===== ENEMIES =====
         const enemies: Enemy[] = [];
+        const spawnPoints = [
+            { c: 0, r: 0 },                             // top-left
+            { c: MAP_SIZE - 1, r: 0 },                  // top-right
+            { c: Math.floor(MAP_SIZE / 2), r: 0 },      // top-center
+            { c: 0, r: Math.floor(MAP_SIZE / 2) },      // left-center
+            { c: MAP_SIZE - 1, r: Math.floor(MAP_SIZE / 2) },  // right-center
+        ];
+        let totalEnemiesSpawned = 0;
+        let spawnTimer = SPAWN_START_DELAY;
 
         async function spawnEnemy(c: number, r: number) {
             const pivot = await loadTank({
@@ -289,13 +306,12 @@ export function initBattleCity(
                 gun: '/models/tankgun.fbx',
             });
 
-            // Đổi màu enemy — tint đỏ
             pivot.traverse((obj) => {
                 if ((obj as THREE.Mesh).isMesh) {
                     const mat = (obj as THREE.Mesh).material;
                     const tint = (m: THREE.Material) => {
                         const std = m as THREE.MeshStandardMaterial;
-                        if (std.color) std.color.multiplyScalar(1.0).lerp(new THREE.Color(0xff2e88), 0.55);
+                        if (std.color) std.color.lerp(new THREE.Color(0xff2e88), 0.55);
                     };
                     if (Array.isArray(mat)) mat.forEach(tint);
                     else tint(mat);
@@ -308,25 +324,16 @@ export function initBattleCity(
             worldGroup.add(pivot);
 
             enemies.push({
-                pivot,
-                x,
-                z,
-                targetAngle: 0,
-                currentAngle: 0,
-                hp: ENEMY_HP,
-                alive: true,
-                path: [],
-                pathIndex: 0,
-                lastRecomputeTime: -999,
-                lastPathVersion: -1,
-                lastFireTime: -999,
-                moveTimer: 0,
-                moving: false,
+                pivot, x, z,
+                targetAngle: 0, currentAngle: 0,
+                hp: ENEMY_HP, alive: true,
+                path: [], pathIndex: 0,
+                lastRecomputeTime: -999, lastPathVersion: -1,
+                lastFireTime: -999, moveTimer: 0, moving: false,
             });
-        }
 
-        // Spawn 1 enemy ban đầu ở góc trên
-        await spawnEnemy(0, 0);
+            callbacks.onEnemyCountChange?.(enemies.filter((e) => e.alive).length, MAX_ENEMIES);
+        }
 
         // ===== BULLET POOL =====
         const bulletGeo = new THREE.SphereGeometry(BULLET_RADIUS, 8, 6);
@@ -357,9 +364,7 @@ export function initBattleCity(
                 e.preventDefault();
             }
         };
-        const onKeyUp = (e: KeyboardEvent) => {
-            keys[e.key.toLowerCase()] = false;
-        };
+        const onKeyUp = (e: KeyboardEvent) => { keys[e.key.toLowerCase()] = false; };
         window.addEventListener('keydown', onKeyDown);
         window.addEventListener('keyup', onKeyUp);
 
@@ -367,10 +372,8 @@ export function initBattleCity(
         function canMoveTo(x: number, z: number): boolean {
             const r = TANK_RADIUS;
             const corners = [
-                [x - r, z - r],
-                [x + r, z - r],
-                [x - r, z + r],
-                [x + r, z + r],
+                [x - r, z - r], [x + r, z - r],
+                [x - r, z + r], [x + r, z + r],
             ];
             for (const [cx, cz] of corners) {
                 const gc = Math.floor(cx + half);
@@ -381,33 +384,20 @@ export function initBattleCity(
             return true;
         }
 
-        // ===== PATHFINDING — BFS =====
-        // Trả về đường đi từ (sc, sr) tới (tc, tr) — mảng cell
+        // ===== BFS PATHFINDING =====
         function findPath(sc: number, sr: number, tc: number, tr: number): { c: number; r: number }[] {
             if (sc === tc && sr === tr) return [];
-
-            const visited = Array.from({ length: MAP_SIZE }, () =>
-                Array(MAP_SIZE).fill(false)
-            );
+            const visited = Array.from({ length: MAP_SIZE }, () => Array(MAP_SIZE).fill(false));
             const parent: ({ c: number; r: number } | null)[][] = Array.from(
-                { length: MAP_SIZE },
-                () => Array(MAP_SIZE).fill(null)
+                { length: MAP_SIZE }, () => Array(MAP_SIZE).fill(null)
             );
-
-            const queue: { c: number; r: number }[] = [{ c: sc, r: sr }];
+            const queue = [{ c: sc, r: sr }];
             visited[sr][sc] = true;
-
-            const dirs = [
-                { c: 0, r: -1 },  // up
-                { c: 1, r: 0 },   // right
-                { c: 0, r: 1 },   // down
-                { c: -1, r: 0 },  // left
-            ];
+            const dirs = [{ c: 0, r: -1 }, { c: 1, r: 0 }, { c: 0, r: 1 }, { c: -1, r: 0 }];
 
             while (queue.length > 0) {
                 const cur = queue.shift()!;
                 if (cur.c === tc && cur.r === tr) {
-                    // Reconstruct path
                     const path: { c: number; r: number }[] = [];
                     let node: { c: number; r: number } | null = cur;
                     while (node && !(node.c === sc && node.r === sr)) {
@@ -416,64 +406,46 @@ export function initBattleCity(
                     }
                     return path;
                 }
-
                 for (const d of dirs) {
                     const nc = cur.c + d.c;
                     const nr = cur.r + d.r;
                     if (nc < 0 || nc >= MAP_SIZE || nr < 0 || nr >= MAP_SIZE) continue;
-                    if (visited[nr][nc]) continue;
-                    if (walls[nr][nc]) continue;
+                    if (visited[nr][nc] || walls[nr][nc]) continue;
                     visited[nr][nc] = true;
                     parent[nr][nc] = cur;
                     queue.push({ c: nc, r: nr });
                 }
             }
-
-            return [];   // Không tìm thấy
+            return [];
         }
 
-        // ===== LINE OF SIGHT =====
         function hasLineOfSight(x1: number, z1: number, x2: number, z2: number): boolean {
-            // Check theo trục chính — đơn giản hoá cho 4 hướng
             const gc1 = Math.floor(x1 + half);
             const gr1 = Math.floor(z1 + half);
             const gc2 = Math.floor(x2 + half);
             const gr2 = Math.floor(z2 + half);
 
-            // Cùng row
             if (gr1 === gr2) {
                 const minC = Math.min(gc1, gc2);
                 const maxC = Math.max(gc1, gc2);
-                for (let c = minC + 1; c < maxC; c++) {
-                    if (walls[gr1][c]) return false;
-                }
+                for (let c = minC + 1; c < maxC; c++) if (walls[gr1][c]) return false;
                 return true;
             }
-
-            // Cùng col
             if (gc1 === gc2) {
                 const minR = Math.min(gr1, gr2);
                 const maxR = Math.max(gr1, gr2);
-                for (let r = minR + 1; r < maxR; r++) {
-                    if (walls[r][gc1]) return false;
-                }
+                for (let r = minR + 1; r < maxR; r++) if (walls[r][gc1]) return false;
                 return true;
             }
-
             return false;
         }
 
-        // ===== FIRE =====
         function fireBullet(
-            elapsed: number,
-            fromX: number,
-            fromZ: number,
-            angle: number,
+            elapsed: number, fromX: number, fromZ: number, angle: number,
             owner: 'player' | 'enemy'
         ): boolean {
             const fx = Math.sin(angle);
             const fz = Math.cos(angle);
-
             const b = bullets.find((x) => !x.alive);
             if (!b) return false;
 
@@ -481,34 +453,27 @@ export function initBattleCity(
             b.mesh.position.set(fromX + fx * spawnDist, 0.4, fromZ + fz * spawnDist);
             b.mesh.material = owner === 'player' ? bulletMatPlayer : bulletMatEnemy;
             b.mesh.visible = true;
-
-            b.dx = fx;
-            b.dz = fz;
+            b.dx = fx; b.dz = fz;
             b.life = BULLET_LIFETIME;
             b.alive = true;
             b.owner = owner;
             return true;
         }
 
-        // ===== WALL DAMAGE =====
         function damageWall(r: number, c: number, now: number) {
             const w = wallData[r][c];
-            if (!w) return;
-            if (w.type !== 1) return;   // Chỉ brick phá được
-
+            if (!w || w.type !== 1) return;
             w.hp -= 1;
-
             const mat = w.mesh.material as THREE.MeshStandardMaterial;
             mat.emissive.setHex(FLASH_EMISSIVE);
             mat.emissiveIntensity = FLASH_INTENSITY;
             w.flashUntil = now + FLASH_DURATION;
-
             if (w.hp <= 0) {
                 worldGroup.remove(w.mesh);
                 (w.mesh.material as THREE.Material).dispose();
                 wallData[r][c] = null;
                 walls[r][c] = false;
-                wallVersion++;   // ⭐ Báo cho enemy biết cần recompute path
+                wallVersion++;
             }
         }
 
@@ -527,71 +492,59 @@ export function initBattleCity(
             }
         }
 
-        // ===== BULLET COLLISION =====
-        function checkBulletHitTank(
-            bullet: Bullet,
-            tankX: number,
-            tankZ: number
-        ): boolean {
+        function checkBulletHitTank(bullet: Bullet, tankX: number, tankZ: number): boolean {
             const dx = bullet.mesh.position.x - tankX;
             const dz = bullet.mesh.position.z - tankZ;
-            const dist = Math.hypot(dx, dz);
-            return dist < TANK_RADIUS + BULLET_RADIUS;
+            return Math.hypot(dx, dz) < TANK_RADIUS + BULLET_RADIUS;
         }
 
         function updateBullets(dt: number, now: number) {
             for (const b of bullets) {
                 if (!b.alive) continue;
-
                 b.life -= dt;
-                if (b.life <= 0) {
-                    b.alive = false;
-                    b.mesh.visible = false;
-                    continue;
-                }
+                if (b.life <= 0) { b.alive = false; b.mesh.visible = false; continue; }
 
                 const nx = b.mesh.position.x + b.dx * BULLET_SPEED * dt;
                 const nz = b.mesh.position.z + b.dz * BULLET_SPEED * dt;
-
                 const gc = Math.floor(nx + half);
                 const gr = Math.floor(nz + half);
 
                 if (gc < 0 || gc >= MAP_SIZE || gr < 0 || gr >= MAP_SIZE) {
-                    b.alive = false;
-                    b.mesh.visible = false;
-                    continue;
+                    b.alive = false; b.mesh.visible = false; continue;
                 }
-
                 if (walls[gr][gc]) {
                     damageWall(gr, gc, now);
-                    b.alive = false;
-                    b.mesh.visible = false;
-                    continue;
+                    b.alive = false; b.mesh.visible = false; continue;
                 }
 
-                // Check hit player (nếu đạn enemy)
                 if (b.owner === 'enemy' && playerAlive) {
                     if (checkBulletHitTank(b, tankPivot.position.x, tankPivot.position.z)) {
-                        b.alive = false;
-                        b.mesh.visible = false;
+                        b.alive = false; b.mesh.visible = false;
                         playerHp -= 1;
-                        if (playerHp <= 0) playerAlive = false;
+                        playerFlashUntil = now + PLAYER_FLASH_DURATION;
+                        callbacks.onPlayerHpChange?.(Math.max(0, playerHp), PLAYER_MAX_HP);
+                        if (playerHp <= 0) {
+                            playerAlive = false;
+                            endGame(false);
+                        }
                         continue;
                     }
                 }
 
-                // Check hit enemy (nếu đạn player)
                 if (b.owner === 'player') {
                     let hit = false;
                     for (const e of enemies) {
                         if (!e.alive) continue;
                         if (checkBulletHitTank(b, e.x, e.z)) {
-                            b.alive = false;
-                            b.mesh.visible = false;
+                            b.alive = false; b.mesh.visible = false;
                             e.hp -= 1;
                             if (e.hp <= 0) {
                                 e.alive = false;
                                 worldGroup.remove(e.pivot);
+                                callbacks.onEnemyCountChange?.(
+                                    enemies.filter((x) => x.alive).length, MAX_ENEMIES
+                                );
+                                checkWinCondition();
                             }
                             hit = true;
                             break;
@@ -605,16 +558,30 @@ export function initBattleCity(
             }
         }
 
-        // ===== ENEMY AI =====
+        function checkWinCondition() {
+            if (gameEnded) return;
+            if (
+                totalEnemiesSpawned >= MAX_ENEMIES &&
+                enemies.filter((e) => e.alive).length === 0
+            ) {
+                endGame(true);
+            }
+        }
+
+        function endGame(win: boolean) {
+            if (gameEnded) return;
+            gameEnded = true;
+            callbacks.onGameOver?.(win);
+        }
+
         function updateEnemy(e: Enemy, dt: number, now: number) {
-            if (!e.alive) return;
+            if (!e.alive || gameEnded) return;
 
             const pCol = Math.floor(tankPivot.position.x + half);
             const pRow = Math.floor(tankPivot.position.z + half);
             const eCol = Math.floor(e.x + half);
             const eRow = Math.floor(e.z + half);
 
-            // Recompute path nếu cần
             const needRecompute =
                 e.path.length === 0 ||
                 e.lastPathVersion !== wallVersion ||
@@ -627,11 +594,9 @@ export function initBattleCity(
                 e.lastPathVersion = wallVersion;
             }
 
-            // Nếu đang "nghỉ" giữa các bước → chờ
             if (!e.moving) {
                 e.moveTimer -= dt;
                 if (e.moveTimer > 0) {
-                    // Vẫn xoay mượt
                     let diff = e.targetAngle - e.currentAngle;
                     while (diff > Math.PI) diff -= Math.PI * 2;
                     while (diff < -Math.PI) diff += Math.PI * 2;
@@ -639,13 +604,10 @@ export function initBattleCity(
                     e.pivot.rotation.y = e.currentAngle;
                     return;
                 }
-
-                // Bắt đầu bước mới
                 e.moving = true;
                 e.moveTimer = ENEMY_MOVE_DURATION;
             }
 
-            // Di chuyển theo path
             if (e.path.length === 0 || e.pathIndex >= e.path.length) {
                 e.moving = false;
                 e.moveTimer = 0;
@@ -655,37 +617,29 @@ export function initBattleCity(
             const next = e.path[e.pathIndex];
             const targetX = next.c * CELL - half + CELL / 2;
             const targetZ = next.r * CELL - half + CELL / 2;
-
             const ddx = targetX - e.x;
             const ddz = targetZ - e.z;
             const dist = Math.hypot(ddx, ddz);
 
-            // Xác định hướng và xoay
             if (Math.abs(ddx) > 0.01 || Math.abs(ddz) > 0.01) {
-                // Snap hướng về 4 hướng chính
-                let dirX = 0;
-                let dirZ = 0;
+                let dirX = 0, dirZ = 0;
                 if (Math.abs(ddx) > Math.abs(ddz)) dirX = Math.sign(ddx);
                 else dirZ = Math.sign(ddz);
-
                 e.targetAngle = Math.atan2(dirX, dirZ);
             }
 
-            // Xoay mượt
             let diff = e.targetAngle - e.currentAngle;
             while (diff > Math.PI) diff -= Math.PI * 2;
             while (diff < -Math.PI) diff += Math.PI * 2;
             e.currentAngle += diff * Math.min(1, dt * 10);
             e.pivot.rotation.y = e.currentAngle;
 
-            // Di chuyển tới cell tiếp theo
             const step = ENEMY_SPEED * dt;
             if (dist <= step) {
-                e.x = targetX;
-                e.z = targetZ;
+                e.x = targetX; e.z = targetZ;
                 e.pathIndex++;
                 e.moving = false;
-                e.moveTimer = 0.15;   // nghỉ ngắn giữa các ô
+                e.moveTimer = 0.15;
             } else {
                 e.x += (ddx / dist) * step;
                 e.z += (ddz / dist) * step;
@@ -694,24 +648,19 @@ export function initBattleCity(
             e.pivot.position.x = e.x;
             e.pivot.position.z = e.z;
 
-            // ===== FIRE — nếu thấy player =====
             if (
                 playerAlive &&
                 now - e.lastFireTime > ENEMY_FIRE_COOLDOWN &&
                 hasLineOfSight(e.x, e.z, tankPivot.position.x, tankPivot.position.z)
             ) {
-                // Xoay về phía player trước khi bắn
                 const pdx = tankPivot.position.x - e.x;
                 const pdz = tankPivot.position.z - e.z;
-                let dirX = 0;
-                let dirZ = 0;
+                let dirX = 0, dirZ = 0;
                 if (Math.abs(pdx) > Math.abs(pdz)) dirX = Math.sign(pdx);
                 else dirZ = Math.sign(pdz);
-
                 e.targetAngle = Math.atan2(dirX, dirZ);
                 e.currentAngle = e.targetAngle;
                 e.pivot.rotation.y = e.currentAngle;
-
                 fireBullet(now, e.x, e.z, e.currentAngle, 'enemy');
                 e.lastFireTime = now;
             }
@@ -722,7 +671,6 @@ export function initBattleCity(
         let raf = 0;
         const timer = new THREE.Timer();
         timer.connect(document);
-
         let targetAngle = tankPivot.rotation.y;
 
         const animate = () => {
@@ -731,30 +679,23 @@ export function initBattleCity(
             const dt = Math.min(timer.getDelta(), 0.05);
             const now = timer.getElapsed();
 
-            // ===== PLAYER MOVE =====
-            if (playerAlive) {
-                let dx = 0;
-                let dz = 0;
+            // ===== PLAYER =====
+            if (playerAlive && !gameEnded) {
+                let dx = 0, dz = 0;
                 if (keys['w'] || keys['arrowup']) dz -= 1;
                 if (keys['s'] || keys['arrowdown']) dz += 1;
                 if (keys['a'] || keys['arrowleft']) dx -= 1;
                 if (keys['d'] || keys['arrowright']) dx += 1;
 
                 if (dx !== 0 || dz !== 0) {
-                    if (Math.abs(dx) > Math.abs(dz)) {
-                        dz = 0; dx = Math.sign(dx);
-                    } else {
-                        dx = 0; dz = Math.sign(dz);
-                    }
-
+                    if (Math.abs(dx) > Math.abs(dz)) { dz = 0; dx = Math.sign(dx); }
+                    else { dx = 0; dz = Math.sign(dz); }
                     targetAngle = Math.atan2(dx, dz);
-
                     const step = speed * dt;
                     const curX = tankPivot.position.x;
                     const curZ = tankPivot.position.z;
                     const tryX = curX + dx * step;
                     const tryZ = curZ + dz * step;
-
                     if (canMoveTo(tryX, tryZ)) {
                         tankPivot.position.x = tryX;
                         tankPivot.position.z = tryZ;
@@ -775,15 +716,29 @@ export function initBattleCity(
                         lastFireTime = now;
                     }
                 }
-            } else {
-                // Player chết — xoay tròn cho vui
-                tankPivot.rotation.y += dt * 2;
             }
 
-            // ===== ENEMY UPDATE =====
-            for (const e of enemies) updateEnemy(e, dt, now);
+            // ===== PLAYER FLASH =====
+            if (now < playerFlashUntil) {
+                const t = playerFlashUntil - now;
+                tankPivot.visible = Math.floor(t * 25) % 2 === 0;
+            } else {
+                tankPivot.visible = true;
+            }
 
-            // ===== BULLETS =====
+            // ===== SPAWN ENEMIES =====
+            if (!gameEnded && totalEnemiesSpawned < MAX_ENEMIES) {
+                spawnTimer -= dt;
+                if (spawnTimer <= 0) {
+                    const pt = spawnPoints[totalEnemiesSpawned % spawnPoints.length];
+                    spawnEnemy(pt.c, pt.r);
+                    totalEnemiesSpawned++;
+                    spawnTimer = SPAWN_INTERVAL;
+                }
+            }
+
+            // ===== UPDATE =====
+            for (const e of enemies) updateEnemy(e, dt, now);
             updateBullets(dt, now);
             updateWallFlashes(now);
 
@@ -812,7 +767,6 @@ export function initBattleCity(
         window.addEventListener('resize', onResize);
         setTimeout(onResize, 50);
 
-        // ===== RETURN =====
         return {
             setParam: (key, value) => {
                 if (key === 'moveSpeed') speed = value as number;
@@ -824,7 +778,6 @@ export function initBattleCity(
                 window.removeEventListener('resize', onResize);
                 window.removeEventListener('keydown', onKeyDown);
                 window.removeEventListener('keyup', onKeyUp);
-
                 bulletGeo.dispose();
                 bulletMatPlayer.dispose();
                 bulletMatEnemy.dispose();
@@ -832,7 +785,6 @@ export function initBattleCity(
                 brickMatBase.dispose();
                 steelMatBase.dispose();
                 baseMatBase.dispose();
-
                 scene.traverse((obj) => {
                     if ((obj as THREE.Mesh).geometry) (obj as THREE.Mesh).geometry.dispose();
                     const mat = (obj as THREE.Mesh).material;
