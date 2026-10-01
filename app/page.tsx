@@ -159,7 +159,7 @@ export default function AboutPage() {
                 <h3>Casual Game Developer</h3>
                 <span className="timeline-date">02/2025 — 12/2025</span>
               </div>
-              <p className="timeline-company">New Studio · Mobile Casual &amp; Puzzle</p>
+              <p className="timeline-company">Nev Studio · Mobile Casual &amp; Puzzle</p>
               <ul>
                 <li>Developed multiple Casual/Puzzle games: Restaurant Management, Cover Shooter, Wave Defense.</li>
                 <li>Built gameplay loops, enemy AI, reward systems, and UI flow with Unity (C#) and OOP principles.</li>
@@ -174,10 +174,10 @@ export default function AboutPage() {
             <div className="timeline-dot" />
             <div className="timeline-content">
               <div className="timeline-head">
-                <h3>Interactive 3D &amp; Frontend</h3>
-                <span className="timeline-date">2023 — 2024</span>
+                <h3>Software Engineer</h3>
+                <span className="timeline-date">02/2023 — 01/2025</span>
               </div>
-              <p className="timeline-company">SaaS &amp; Interactive 3D · Norwegian Market</p>
+              <p className="timeline-company">eKonect Solutions · SaaS &amp; Interactive 3D (Norway)</p>
               <ul>
                 <li>Developed an interactive 3D mobile application with complex UI systems and 3D environments.</li>
                 <li>Led frontend architecture of a B2B platform using Angular; wrote unit tests for reliability.</li>
