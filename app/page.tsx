@@ -32,7 +32,7 @@ export default function AboutPage() {
           <div className="cta-row">
             <a
               className="btn btn-primary"
-              href="/NguyenAnPhuc-CV.pdf"
+              href="/Nguyen An Phuc - Game Developer.pdf"
               target="_blank"
               rel="noopener noreferrer"
             >
