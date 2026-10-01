@@ -1428,20 +1428,72 @@ a {
 }
 
 .battle-city-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
   font-family: ui-monospace, monospace;
   font-size: 0.8rem;
   color: var(--muted);
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-top: 1px solid var(--line);
   background: rgba(0, 229, 255, 0.03);
+  flex-wrap: wrap;
 }
 
-.battle-city-hint strong {
-  color: var(--cyan);
+.battle-city-hint .hint-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.battle-city-hint .hint-label {
+  margin-left: 6px;
+  color: #c9c9dd;
+  font-size: 0.8rem;
+}
+
+.battle-city-hint .hint-sep {
+  color: var(--line);
+  font-size: 1rem;
+  user-select: none;
+}
+
+.battle-city-hint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  line-height: 1;
 }
 
 @media (max-width: 720px) {
   .battle-city-viewport {
     aspect-ratio: 4 / 3;
+  }
+  .battle-city-hint {
+    font-size: 0.72rem;
+    gap: 10px;
+    padding: 12px;
+  }
+  .battle-city-hint kbd {
+    min-width: 22px;
+    height: 22px;
+    font-size: 0.68rem;
+    padding: 0 5px;
+  }
+  .battle-city-hint .hint-label {
+    font-size: 0.72rem;
   }
 }

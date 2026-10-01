@@ -61,8 +61,20 @@ export default function BattleCity3D() {
           </div>
         )}
       </div>
+
       <div className="battle-city-hint">
-        ⌨ <strong>WASD</strong> or <strong>Arrow keys</strong> to move the tank
+        <span className="hint-item">
+          <kbd>W</kbd>
+          <kbd>A</kbd>
+          <kbd>S</kbd>
+          <kbd>D</kbd>
+          <span className="hint-label">Move</span>
+        </span>
+        <span className="hint-sep">·</span>
+        <span className="hint-item">
+          <kbd>SPACE</kbd>
+          <span className="hint-label">Fire</span>
+        </span>
       </div>
     </div>
   );
