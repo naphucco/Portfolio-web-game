@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 
-// Suppress FBXLoader Z-up warning (vô hại)
 if (typeof window !== 'undefined') {
   const _origWarn = console.warn;
   console.warn = (...args: unknown[]) => {
@@ -26,14 +25,19 @@ const CELL = 1;
 const TANK_RADIUS = 0.35;
 const CAMERA_OFFSET = new THREE.Vector3(9, 11, 9);
 
-// Bullet constants
+// Bullet
 const BULLET_SPEED = 9;
 const BULLET_RADIUS = 0.12;
 const BULLET_LIFETIME = 2.0;
 const FIRE_COOLDOWN = 0.35;
 const BULLET_POOL_SIZE = 24;
 
-// 0 = empty, 1 = brick, 2 = steel, 9 = base
+// Wall
+const BRICK_HP = 2;
+const FLASH_DURATION = 0.12;   // seconds
+const FLASH_EMISSIVE = 0xffffff;
+const FLASH_INTENSITY = 3.0;
+
 const MAP_TEMPLATE: number[][] = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 1, 1, 0, 2, 0, 2, 0, 1, 1, 0, 0, 0],
@@ -56,6 +60,14 @@ type Bullet = {
   dz: number;
   life: number;
   alive: boolean;
+};
+
+type WallData = {
+  mesh: THREE.Mesh;
+  hp: number;
+  maxHp: number;
+  type: number;         // 1 = brick, 2 = steel, 9 = base
+  flashUntil: number;
 };
 
 async function loadModel(url: string): Promise<THREE.Object3D> {
@@ -141,7 +153,6 @@ export function initBattleCity(
     const scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x0a0a14, 18, 32);
 
-    // WORLD GROUP — xoay để grid khớp màn hình
     const camYaw = Math.atan2(CAMERA_OFFSET.x, CAMERA_OFFSET.z);
     const worldGroup = new THREE.Group();
     worldGroup.rotation.y = camYaw;
@@ -187,19 +198,22 @@ export function initBattleCity(
     const half = MAP_SIZE / 2;
     const wallGeo = new THREE.BoxGeometry(CELL * 0.95, 0.7, CELL * 0.95);
 
-    const brickMat = new THREE.MeshStandardMaterial({
+    const brickMatBase = new THREE.MeshStandardMaterial({
       color: 0xd2691e, roughness: 0.85, metalness: 0.1,
     });
-    const steelMat = new THREE.MeshStandardMaterial({
+    const steelMatBase = new THREE.MeshStandardMaterial({
       color: 0xa0a8b8, roughness: 0.3, metalness: 0.7,
     });
-    const baseMat = new THREE.MeshStandardMaterial({
+    const baseMatBase = new THREE.MeshStandardMaterial({
       color: 0xffd700, roughness: 0.4, metalness: 0.3,
       emissive: 0xffd700, emissiveIntensity: 0.3,
     });
 
     const walls: boolean[][] = Array.from({ length: MAP_SIZE }, () =>
       Array(MAP_SIZE).fill(false)
+    );
+    const wallData: (WallData | null)[][] = Array.from({ length: MAP_SIZE }, () =>
+      Array(MAP_SIZE).fill(null)
     );
 
     for (let r = 0; r < MAP_SIZE; r++) {
@@ -209,7 +223,8 @@ export function initBattleCity(
 
         walls[r][c] = true;
 
-        const mat = cell === 2 ? steelMat : cell === 9 ? baseMat : brickMat;
+        const baseMat = cell === 2 ? steelMatBase : cell === 9 ? baseMatBase : brickMatBase;
+        const mat = baseMat.clone();
         const mesh = new THREE.Mesh(wallGeo, mat);
         mesh.position.set(
           c * CELL - half + CELL / 2,
@@ -220,6 +235,15 @@ export function initBattleCity(
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         worldGroup.add(mesh);
+
+        const hp = cell === 1 ? BRICK_HP : Infinity;
+        wallData[r][c] = {
+          mesh,
+          hp,
+          maxHp: hp,
+          type: cell,
+          flashUntil: 0,
+        };
       }
     }
 
@@ -247,13 +271,7 @@ export function initBattleCity(
       mesh.visible = false;
       mesh.castShadow = false;
       worldGroup.add(mesh);
-      bullets.push({
-        mesh,
-        dx: 0,
-        dz: 0,
-        life: 0,
-        alive: false,
-      });
+      bullets.push({ mesh, dx: 0, dz: 0, life: 0, alive: false });
     }
 
     let lastFireTime = -999;
@@ -317,8 +335,49 @@ export function initBattleCity(
       b.alive = true;
     }
 
+    // ===== WALL DAMAGE =====
+    function damageWall(r: number, c: number, now: number) {
+      const w = wallData[r][c];
+      if (!w) return;
+
+      // Steel và base không phá được
+      if (w.type !== 1) return;
+
+      w.hp -= 1;
+
+      // Flash
+      const mat = w.mesh.material as THREE.MeshStandardMaterial;
+      mat.emissive.setHex(FLASH_EMISSIVE);
+      mat.emissiveIntensity = FLASH_INTENSITY;
+      w.flashUntil = now + FLASH_DURATION;
+
+      // Hết HP → phá
+      if (w.hp <= 0) {
+        worldGroup.remove(w.mesh);
+        (w.mesh.material as THREE.Material).dispose();
+        wallData[r][c] = null;
+        walls[r][c] = false;
+      }
+    }
+
+    // ===== UPDATE WALL FLASHES =====
+    function updateWallFlashes(now: number) {
+      for (let r = 0; r < MAP_SIZE; r++) {
+        for (let c = 0; c < MAP_SIZE; c++) {
+          const w = wallData[r][c];
+          if (!w || w.flashUntil === 0) continue;
+          if (now >= w.flashUntil) {
+            const mat = w.mesh.material as THREE.MeshStandardMaterial;
+            mat.emissive.setHex(0x000000);
+            mat.emissiveIntensity = 1;
+            w.flashUntil = 0;
+          }
+        }
+      }
+    }
+
     // ===== UPDATE BULLETS =====
-    function updateBullets(dt: number) {
+    function updateBullets(dt: number, now: number) {
       for (const b of bullets) {
         if (!b.alive) continue;
 
@@ -334,11 +393,17 @@ export function initBattleCity(
 
         const gc = Math.floor(nx + half);
         const gr = Math.floor(nz + half);
-        const hitWall =
-          gc < 0 || gc >= MAP_SIZE || gr < 0 || gr >= MAP_SIZE ||
-          walls[gr]?.[gc];
 
-        if (hitWall) {
+        // Out of bounds
+        if (gc < 0 || gc >= MAP_SIZE || gr < 0 || gr >= MAP_SIZE) {
+          b.alive = false;
+          b.mesh.visible = false;
+          continue;
+        }
+
+        // Hit wall
+        if (walls[gr][gc]) {
+          damageWall(gr, gc, now);
           b.alive = false;
           b.mesh.visible = false;
           continue;
@@ -361,8 +426,9 @@ export function initBattleCity(
       raf = requestAnimationFrame(animate);
       timer.update();
       const dt = Math.min(timer.getDelta(), 0.05);
+      const now = timer.getElapsed();
 
-      // ===== MOVE INPUT =====
+      // ===== MOVE =====
       let dx = 0;
       let dz = 0;
       if (keys['w'] || keys['arrowup']) dz -= 1;
@@ -371,7 +437,6 @@ export function initBattleCity(
       if (keys['d'] || keys['arrowright']) dx += 1;
 
       if (dx !== 0 || dz !== 0) {
-        // Snap về 4 hướng
         if (Math.abs(dx) > Math.abs(dz)) {
           dz = 0;
           dx = Math.sign(dx);
@@ -406,14 +471,13 @@ export function initBattleCity(
       tankPivot.rotation.y += diff * Math.min(1, dt * 10);
 
       // ===== FIRE =====
-      if (keys[' ']) {
-        fireBullet(timer.getElapsed());
-      }
+      if (keys[' ']) fireBullet(now);
 
-      // ===== UPDATE BULLETS =====
-      updateBullets(dt);
+      // ===== UPDATE =====
+      updateBullets(dt, now);
+      updateWallFlashes(now);
 
-      // ===== CAMERA FOLLOW =====
+      // ===== CAMERA =====
       const targetPos = tankPivot.position.clone().add(CAMERA_OFFSET);
       camera.position.lerp(targetPos, Math.min(1, dt * 6));
       camera.lookAt(tankPivot.position.x, 0, tankPivot.position.z);
@@ -438,7 +502,7 @@ export function initBattleCity(
     window.addEventListener('resize', onResize);
     setTimeout(onResize, 50);
 
-    // ===== RETURN HANDLE =====
+    // ===== RETURN =====
     return {
       setParam: (key, value) => {
         if (key === 'moveSpeed') speed = value as number;
@@ -453,6 +517,10 @@ export function initBattleCity(
 
         bulletGeo.dispose();
         bulletMat.dispose();
+        wallGeo.dispose();
+        brickMatBase.dispose();
+        steelMatBase.dispose();
+        baseMatBase.dispose();
 
         scene.traverse((obj) => {
           if ((obj as THREE.Mesh).geometry) (obj as THREE.Mesh).geometry.dispose();
