@@ -30,29 +30,23 @@ export default function AboutPage() {
             Also comfortable with <strong>HTML/CSS</strong> and a bit of <strong>realtime backend &amp; databases</strong> (Firebase, Pomelo, SQL).
           </p>
           <div className="cta-row">
-            <a
-              className="btn btn-primary"
-              href="/Nguyen An Phuc - Game Developer.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              📄 Download CV (PDF)
-            </a>
-            <Link href="/games" className="btn btn-ghost">
+            <Link href="/games" className="btn btn-primary">
               🎮 View demos
             </Link>
+            <a
+              href="https://linkedin.com/in/anphucnguyen"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-ghost"
+            >
+              💼 LinkedIn
+            </a>
           </div>
         </div>
       </section>
 
       {/* ===== QUICK CONTACT ===== */}
       <section className="about-contact">
-        <a href="mailto:nguyenanphuc92@gmail.com" className="contact-link">
-          <span className="k">EMAIL</span> nguyenanphuc92@gmail.com
-        </a>
-        <a href="tel:+84335789544" className="contact-link">
-          <span className="k">PHONE</span> (+84) 335 789 544
-        </a>
         <a
           href="https://linkedin.com/in/anphucnguyen"
           target="_blank"
@@ -68,6 +62,14 @@ export default function AboutPage() {
           className="contact-link"
         >
           <span className="k">STUDIO</span> An Phuc Co Studio
+        </a>
+        <a
+          href="https://github.com/naphucco"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="contact-link"
+        >
+          <span className="k">GITHUB</span> naphucco
         </a>
       </section>
 
@@ -324,22 +326,24 @@ export default function AboutPage() {
         <h2 className="section-title">Let's build something fun</h2>
         <p className="lead">
           I'm open to freelance opportunities and Game Developer roles. If you need a prototype,
-          or just want to talk games — drop me a message.
+          or just want to talk games — reach out on LinkedIn.
         </p>
         <div className="cta-row">
-          <a href="mailto:nguyenanphuc92@gmail.com" className="btn btn-primary">
-            ✉️ Send email
-          </a>
           <a
             href="https://linkedin.com/in/anphucnguyen"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-ghost"
+            className="btn btn-primary"
           >
-            💼 LinkedIn
+            💼 Connect on LinkedIn
           </a>
+          <Link href="/games" className="btn btn-ghost">
+            🎮 View demos
+          </Link>
         </div>
       </section>
     </main>
   );
 }
+
+// hide: download cv, phone, email

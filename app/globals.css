@@ -604,6 +604,7 @@ a {
 .about-contact {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
   margin: 24px 0 60px;
 }
