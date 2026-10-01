@@ -47,6 +47,8 @@ const ENEMY_HP = 2;
 const ENEMY_FIRE_COOLDOWN = 1.2;
 const ENEMY_MOVE_DURATION = 0.6;
 const ENEMY_PATH_RECOMPUTE = 0.5;
+const ENEMY_RANDOM_FIRE_MIN = 2.5;
+const ENEMY_RANDOM_FIRE_MAX = 5.0;
 
 const PLAYER_MAX_HP = 4;
 const PLAYER_FLASH_DURATION = 0.4;
@@ -103,6 +105,7 @@ type Enemy = {
     lastFireTime: number;
     moveTimer: number;
     moving: boolean;
+    nextRandomFire: number;
 };
 
 async function loadModel(url: string): Promise<THREE.Object3D> {
@@ -142,6 +145,7 @@ async function loadTank(url: { body: string; tower: string; gun: string }): Prom
     ]);
 
     const root = new THREE.Group();
+
     const body = normalizeModel(bodyModel, 0.9);
     root.add(body);
 
@@ -175,6 +179,7 @@ export function initBattleCity(
         const width = container.clientWidth;
         const height = container.clientHeight;
 
+        // ===== RENDERER =====
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         renderer.setSize(width, height);
@@ -183,6 +188,7 @@ export function initBattleCity(
         renderer.shadowMap.type = THREE.PCFShadowMap;
         container.appendChild(renderer.domElement);
 
+        // ===== SCENE =====
         const scene = new THREE.Scene();
         scene.fog = new THREE.Fog(0x0a0a14, 18, 32);
 
@@ -191,8 +197,10 @@ export function initBattleCity(
         worldGroup.rotation.y = camYaw;
         scene.add(worldGroup);
 
+        // ===== CAMERA =====
         const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
 
+        // ===== LIGHTS =====
         scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
         const sun = new THREE.DirectionalLight(0xffffff, 1.1);
@@ -209,6 +217,7 @@ export function initBattleCity(
         rim.position.set(-5, 4, -5);
         scene.add(rim);
 
+        // ===== GROUND =====
         const groundGeo = new THREE.PlaneGeometry(MAP_SIZE, MAP_SIZE);
         const groundMat = new THREE.MeshStandardMaterial({
             color: 0x14141e, roughness: 0.95, metalness: 0.05,
@@ -222,6 +231,7 @@ export function initBattleCity(
         grid.position.y = 0.001;
         worldGroup.add(grid);
 
+        // ===== WALLS =====
         const half = MAP_SIZE / 2;
         const wallGeo = new THREE.BoxGeometry(CELL * 0.95, 0.7, CELL * 0.95);
 
@@ -290,11 +300,11 @@ export function initBattleCity(
         // ===== ENEMIES =====
         const enemies: Enemy[] = [];
         const spawnPoints = [
-            { c: 0, r: 0 },                             // top-left
-            { c: MAP_SIZE - 1, r: 0 },                  // top-right
-            { c: Math.floor(MAP_SIZE / 2), r: 0 },      // top-center
-            { c: 0, r: Math.floor(MAP_SIZE / 2) },      // left-center
-            { c: MAP_SIZE - 1, r: Math.floor(MAP_SIZE / 2) },  // right-center
+            { c: 0, r: 0 },
+            { c: MAP_SIZE - 1, r: 0 },
+            { c: Math.floor(MAP_SIZE / 2), r: 0 },
+            { c: 0, r: Math.floor(MAP_SIZE / 2) },
+            { c: MAP_SIZE - 1, r: Math.floor(MAP_SIZE / 2) },
         ];
         let totalEnemiesSpawned = 0;
         let spawnTimer = SPAWN_START_DELAY;
@@ -323,6 +333,10 @@ export function initBattleCity(
             pivot.position.set(x, 0, z);
             worldGroup.add(pivot);
 
+            const nextRandomFire =
+                ENEMY_RANDOM_FIRE_MIN +
+                Math.random() * (ENEMY_RANDOM_FIRE_MAX - ENEMY_RANDOM_FIRE_MIN);
+
             enemies.push({
                 pivot, x, z,
                 targetAngle: 0, currentAngle: 0,
@@ -330,6 +344,7 @@ export function initBattleCity(
                 path: [], pathIndex: 0,
                 lastRecomputeTime: -999, lastPathVersion: -1,
                 lastFireTime: -999, moveTimer: 0, moving: false,
+                nextRandomFire,
             });
 
             callbacks.onEnemyCountChange?.(enemies.filter((e) => e.alive).length, MAX_ENEMIES);
@@ -594,6 +609,24 @@ export function initBattleCity(
                 e.lastPathVersion = wallVersion;
             }
 
+            // ⭐ Bắn random định kỳ — không quan tâm player
+            if (now >= e.nextRandomFire) {
+                fireBullet(now, e.x, e.z, e.currentAngle, 'enemy');
+                e.lastFireTime = now;
+                e.nextRandomFire =
+                    now +
+                    ENEMY_RANDOM_FIRE_MIN +
+                    Math.random() * (ENEMY_RANDOM_FIRE_MAX - ENEMY_RANDOM_FIRE_MIN);
+            }
+
+            // Nếu không có path → đứng yên, xoay chậm
+            if (e.path.length === 0) {
+                e.moving = false;
+                e.currentAngle += dt * 0.8;
+                e.pivot.rotation.y = e.currentAngle;
+                return;
+            }
+
             if (!e.moving) {
                 e.moveTimer -= dt;
                 if (e.moveTimer > 0) {
@@ -608,7 +641,7 @@ export function initBattleCity(
                 e.moveTimer = ENEMY_MOVE_DURATION;
             }
 
-            if (e.path.length === 0 || e.pathIndex >= e.path.length) {
+            if (e.pathIndex >= e.path.length) {
                 e.moving = false;
                 e.moveTimer = 0;
                 return;
@@ -648,6 +681,7 @@ export function initBattleCity(
             e.pivot.position.x = e.x;
             e.pivot.position.z = e.z;
 
+            // ===== BẮN PLAYER khi thấy + cooldown =====
             if (
                 playerAlive &&
                 now - e.lastFireTime > ENEMY_FIRE_COOLDOWN &&

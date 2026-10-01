@@ -35,7 +35,6 @@ export default function BoidSwarm() {
         || ('ontouchstart' in window && window.innerWidth < 1024);
       setIsMobile(mobile);
 
-      // Clamp count khi vượt max mới
       const maxAllowed = mobile ? MAX_COUNT_MOBILE : MAX_COUNT_DESKTOP;
       setParams((prev) => {
         if (prev.count > maxAllowed) {
@@ -100,7 +99,7 @@ export default function BoidSwarm() {
   const sliderStep = isMobile ? 500 : 1000;
 
   return (
-    <div className="shader-playground">
+    <div className="shader-playground boid-swarm">
       <div className="shader-viewport" ref={containerRef}>
         {loading && (
           <div className="shader-loading">
@@ -203,6 +202,70 @@ export default function BoidSwarm() {
           🖱 Drag to rotate camera. GPU instancing + curl noise — zero CPU per boid.
         </div>
       </div>
+
+      {/* ⭐ Tech note */}
+      <details className="battle-city-tech" open>
+        <summary>
+          <span className="tech-icon">⚙</span>
+          Tech behind this demo
+        </summary>
+
+        <div className="tech-grid">
+          <div className="tech-item">
+            <div className="tech-name">GPU Instancing</div>
+            <div className="tech-desc">
+              Up to <strong>100,000 boids in a single draw call</strong>.
+              Each boid is one instance of a shared 3D mesh — no per-object
+              GameObject overhead.
+            </div>
+          </div>
+
+          <div className="tech-item">
+            <div className="tech-name">Curl Noise</div>
+            <div className="tech-desc">
+              Divergence-free vector field computed per-vertex from 3D simplex
+              noise. Produces organic fluid-like motion without any CPU
+              particle simulation.
+            </div>
+          </div>
+
+          <div className="tech-item">
+            <div className="tech-name">Zero CPU per Boid</div>
+            <div className="tech-desc">
+              All animation runs in the <strong>vertex shader</strong>. CPU
+              only updates a single <code>uTime</code> uniform per frame —
+              the rest is GPU-parallel.
+            </div>
+          </div>
+
+          <div className="tech-item">
+            <div className="tech-name">GLTF Model Pipeline</div>
+            <div className="tech-desc">
+              Boids use a loaded <code>.glb</code> model with texture, normalized
+              automatically (auto-scale + auto-center). Supports GLB/FBX
+              interchangeably.
+            </div>
+          </div>
+
+          <div className="tech-item">
+            <div className="tech-name">Adaptive Mobile Scaling</div>
+            <div className="tech-desc">
+              Auto-detects mobile and caps boid count + pixel ratio. Desktop
+              goes up to 100k; mobile caps at 10k to keep 50+ FPS on mid-range
+              devices.
+            </div>
+          </div>
+
+          <div className="tech-item">
+            <div className="tech-name">Realtime FPS Counter</div>
+            <div className="tech-desc">
+              Live FPS overlay driven by game-loop timing. Every parameter
+              change (count, speed, size) is measured against actual
+              frame rate.
+            </div>
+          </div>
+        </div>
+      </details>
     </div>
   );
 }
