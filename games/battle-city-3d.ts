@@ -3,6 +3,15 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 
+// Suppress FBXLoader Z-up warning (vô hại)
+if (typeof window !== 'undefined') {
+    const _origWarn = console.warn;
+    console.warn = (...args: unknown[]) => {
+        if (typeof args[0] === 'string' && args[0].includes('Z-UP coordinate system')) return;
+        _origWarn(...args);
+    };
+}
+
 export type BattleCityParams = {
     moveSpeed: number;
 };
@@ -110,7 +119,7 @@ export function initBattleCity(
         renderer.setSize(width, height);
         renderer.setClearColor(0x0a0a14, 1);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.type = THREE.VSMShadowMap;
         container.appendChild(renderer.domElement);
 
         // ===== SCENE =====
@@ -244,15 +253,16 @@ export function initBattleCity(
         // ===== LOOP =====
         let speed = initial.moveSpeed;
         let raf = 0;
-        const clock = new THREE.Clock();
+        const timer = new THREE.Timer();
+        timer.connect(document);
         const tankWorldPos = new THREE.Vector3();
+        let targetAngle = tankPivot.rotation.y;
 
         const animate = () => {
             raf = requestAnimationFrame(animate);
-            const dt = Math.min(clock.getDelta(), 0.05);
+            timer.update();
+            const dt = Math.min(timer.getDelta(), 0.05);
 
-            // Input — giờ trực tiếp là worldGroup local direction
-            // W = -Z (lên trên màn hình), D = +X (phải trên màn hình)
             let dx = 0;
             let dz = 0;
             if (keys['w'] || keys['arrowup']) dz -= 1;
@@ -261,9 +271,17 @@ export function initBattleCity(
             if (keys['d'] || keys['arrowright']) dx += 1;
 
             if (dx !== 0 || dz !== 0) {
-                const len = Math.hypot(dx, dz);
-                dx /= len;
-                dz /= len;
+                // Snap về 4 hướng
+                if (Math.abs(dx) > Math.abs(dz)) {
+                    dz = 0;
+                    dx = Math.sign(dx);
+                } else {
+                    dx = 0;
+                    dz = Math.sign(dz);
+                }
+
+                // ⭐ Cập nhật target angle — tank sẽ xoay đến đây dù sau đó nhả phím
+                targetAngle = Math.atan2(dx, dz);
 
                 const step = speed * dt;
                 const curX = tankPivot.position.x;
@@ -280,14 +298,13 @@ export function initBattleCity(
                 } else if (canMoveTo(curX, tryZ)) {
                     tankPivot.position.z = tryZ;
                 }
-
-                // Xoay tank về hướng di chuyển
-                const targetAngle = Math.atan2(dx, dz);
-                let diff = targetAngle - tankPivot.rotation.y;
-                while (diff > Math.PI) diff -= Math.PI * 2;
-                while (diff < -Math.PI) diff += Math.PI * 2;
-                tankPivot.rotation.y += diff * Math.min(1, dt * 12);
             }
+
+            // ⭐ Luôn xoay về target angle — kể cả khi đã nhả phím
+            let diff = targetAngle - tankPivot.rotation.y;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            tankPivot.rotation.y += diff * Math.min(1, dt * 10);
 
             // Camera follow — dùng world position của tank
             tankPivot.getWorldPosition(tankWorldPos);
@@ -326,6 +343,7 @@ export function initBattleCity(
                 window.removeEventListener('resize', onResize);
                 window.removeEventListener('keydown', onKeyDown);
                 window.removeEventListener('keyup', onKeyUp);
+                timer.disconnect();
                 scene.traverse((obj) => {
                     if ((obj as THREE.Mesh).geometry) (obj as THREE.Mesh).geometry.dispose();
                     const mat = (obj as THREE.Mesh).material;
