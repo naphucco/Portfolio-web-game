@@ -1,10 +1,10 @@
-// components/GameStageClient.tsx
 'use client';
 
 import dynamic from 'next/dynamic';
 import ShaderPlayground from '@/components/ShaderPlayground';
 import ArrowPuzzle from '@/components/ArrowPuzzle';
 import BoidSwarm from '@/components/BoidSwarm';
+import BattleCity3D from '@/components/BattleCity3D';
 import type { Engine } from '@/data/games';
 
 const GameStage = dynamic(() => import('@/components/GameStage'), {
@@ -22,5 +22,6 @@ export default function GameStageClient({
   if (slug === 'shader-playground') return <ShaderPlayground />;
   if (slug === 'arrow-puzzle') return <ArrowPuzzle />;
   if (slug === 'boid-swarm') return <BoidSwarm />;
+  if (slug === 'battle-city-3d') return <BattleCity3D />;
   return <GameStage engine={engine} slug={slug} />;
 }
