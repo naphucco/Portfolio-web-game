@@ -28,7 +28,7 @@ export const posts: Post[] = [
     Content: PlayableAdsArchitectureContent,
   },
   {
-    slug: 'mobile-rts',
+    slug: 'mobile-rts-optimization',
     title: 'Mobile RTS Optimization: 90 FPS on a Mid-Range Phone',
     excerpt:
       'GPU wind, baked lighting, blob shadows, and rim-light shaders — the four techniques that took a mobile RTS from "it works" to a stable 90 FPS on a Galaxy A16.',
