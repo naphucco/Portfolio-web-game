@@ -581,7 +581,7 @@ a {
   display: block;
 }
 
-.post-content > em {
+.post-content>em {
   display: block;
   text-align: center;
   font-family: ui-monospace, monospace;

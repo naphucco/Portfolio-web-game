@@ -4,6 +4,7 @@ import GameOptimizationContent from '@/content/blog/game-optimization';
 import MobileRtsOptimizationContent from '@/content/blog/mobile-rts-optimization';
 import AngularSignalsZonelessContent from '@/content/blog/angular-signals-zoneless';
 import UdemyLearningContent from '@/content/blog/udemy-learning';
+import PlayableAdsArchitectureContent from '@/content/blog/playable-ads-architecture';
 
 export type Post = {
   slug: string;
@@ -17,7 +18,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
-    slug: 'mobile-rts-optimization',
+    slug: 'playable-ads-architecture',
+    title: 'Building a WebGL Playable Ad — Architecture & Optimization',
+    excerpt:
+      'How to fit a full rhythm game into 11 MB: single-scene state machine, physics-free hit detection, ASTC compression, and the trade-offs that actually mattered.',
+    date: '2026-03-01',
+    tags: ['Unity', 'WebGL', 'Playable Ads', 'Optimization'],
+    cover: '/blog/playable-ads-architecture1.jpg',
+    Content: PlayableAdsArchitectureContent,
+  },
+  {
+    slug: 'mobile-rts',
     title: 'Mobile RTS Optimization: 90 FPS on a Mid-Range Phone',
     excerpt:
       'GPU wind, baked lighting, blob shadows, and rim-light shaders — the four techniques that took a mobile RTS from "it works" to a stable 90 FPS on a Galaxy A16.',
@@ -50,7 +61,7 @@ export const posts: Post[] = [
     slug: 'udemy-learning',
     title: 'Why I Pay $11 for Programming Courses When YouTube Is Free',
     excerpt:
-      'Free tutorials are great until you realize you\'ve spent 40 hours rebuilding something that already exists. Here\'s the math behind paid structured learning.',
+      "Free tutorials are great until you realize you've spent 40 hours rebuilding something that already exists. Here's the math behind paid structured learning.",
     date: '2020-04-14',
     tags: ['Learning', 'Career', 'Personal'],
     cover: '/blog/udemy-learning.jpg',
