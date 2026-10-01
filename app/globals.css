@@ -581,7 +581,7 @@ a {
   display: block;
 }
 
-.post-content em {
+.post-content > em {
   display: block;
   text-align: center;
   font-family: ui-monospace, monospace;
@@ -1276,4 +1276,20 @@ a {
   border-radius: 8px;
   border: 1px solid var(--line);
   pointer-events: none;
+}
+
+.skill-learning {
+  border-color: rgba(0, 229, 255, 0.4);
+  color: var(--cyan);
+  font-style: italic;
+}
+
+.post-content code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.88em;
+  background: rgba(139, 92, 246, 0.12);
+  color: #b9a6ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
 }

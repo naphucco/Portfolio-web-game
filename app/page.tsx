@@ -79,9 +79,15 @@ export default function AboutPage() {
           <div className="skill-block">
             <h3>🎮 Game Engines</h3>
             <div className="skills">
-              {['Unity3D (C#)', 'Cocos Creator 2', 'GameMaker Studio', 'Three.js'].map((s) => (
+              {['Unity3D (C#)', 'Cocos Creator 2', 'GameMaker Studio'].map((s) => (
                 <span key={s} className="skill">{s}</span>
               ))}
+              <Link href="/games" className="skill skill-learning">
+                Phaser 3 · learning →
+              </Link>
+              <Link href="/games" className="skill skill-learning">
+                Three.js · learning →
+              </Link>
             </div>
           </div>
 
@@ -106,7 +112,7 @@ export default function AboutPage() {
           <div className="skill-block">
             <h3>🌐 Networking &amp; Backend</h3>
             <div className="skills">
-              {['Pomelo (Realtime)', 'Firebase (Auth, RTDB)', 'SQL Stored Procedures', 'RESTful APIs', 'Unit Testing'].map((s) => (
+              {['Pomelo (Realtime)', 'Firebase', 'SQL Stored Procedures', 'RESTful APIs', 'Unit Testing'].map((s) => (
                 <span key={s} className="skill">{s}</span>
               ))}
             </div>
@@ -168,7 +174,7 @@ export default function AboutPage() {
             <div className="timeline-dot" />
             <div className="timeline-content">
               <div className="timeline-head">
-                <h3>Unity3D Developer &amp; Frontend</h3>
+                <h3>Interactive 3D &amp; Frontend</h3>
                 <span className="timeline-date">2023 — 2024</span>
               </div>
               <p className="timeline-company">SaaS &amp; Interactive 3D · Norwegian Market</p>

@@ -2,6 +2,7 @@
 import type { ComponentType } from 'react';
 import GameOptimizationContent from '@/content/blog/game-optimization';
 import PlaceholderContent from '@/content/blog/placeholder';
+import MobileRtsOptimizationContent from '@/content/blog/mobile-rts-optimization';
 
 export type Post = {
   slug: string;
@@ -23,6 +24,16 @@ export const posts: Post[] = [
     tags: ['Optimization', 'Mobile', 'VFX'],
     cover: '/blog/game-optimization1.jpg',
     Content: GameOptimizationContent,
+  },
+  {
+    slug: 'mobile-rts-optimization',
+    title: 'Mobile RTS Optimization: 90 FPS on a Mid-Range Phone',
+    excerpt:
+      'GPU wind, baked lighting, blob shadows, and rim-light shaders — the four techniques that took a mobile RTS from "it works" to a stable 90 FPS on a Galaxy A16.',
+    date: '2026-02-10',
+    tags: ['Optimization', 'Shader', 'Mobile', 'RTS'],
+    cover: '/blog/mobile-rts-optimization1.jpg',
+    Content: MobileRtsOptimizationContent,
   },
   {
     slug: 'placeholder',
