@@ -1,9 +1,9 @@
 // data/posts.ts
 import type { ComponentType } from 'react';
 import GameOptimizationContent from '@/content/blog/game-optimization';
-import PlaceholderContent from '@/content/blog/placeholder';
 import MobileRtsOptimizationContent from '@/content/blog/mobile-rts-optimization';
 import AngularSignalsZonelessContent from '@/content/blog/angular-signals-zoneless';
+import UdemyLearningContent from '@/content/blog/udemy-learning';
 
 export type Post = {
   slug: string;
@@ -45,6 +45,16 @@ export const posts: Post[] = [
     tags: ['Angular', 'Signals', 'Performance'],
     cover: '/blog/angular-signals-zoneless.jpg',
     Content: AngularSignalsZonelessContent,
+  },
+  {
+    slug: 'udemy-learning',
+    title: 'Why I Pay $11 for Programming Courses When YouTube Is Free',
+    excerpt:
+      'Free tutorials are great until you realize you\'ve spent 40 hours rebuilding something that already exists. Here\'s the math behind paid structured learning.',
+    date: '2020-04-14',
+    tags: ['Learning', 'Career', 'Personal'],
+    cover: '/blog/udemy-learning.jpg',
+    Content: UdemyLearningContent,
   },
 ];
 
