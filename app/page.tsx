@@ -255,9 +255,61 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ===== FEATURED PROJECTS ===== */}
+      {/* ===== CASUAL GAME SHOWCASE ===== */}
       <section className="about-section">
-        <h2 className="section-title">Featured Projects</h2>
+        <h2 className="section-title">Casual Game Showcase</h2>
+        <p className="lead" style={{ marginBottom: 24 }}>
+          Four casual mobile games built and shipped during 2024–2025.
+          All titles were published to the store and have since been delisted —
+          the gameplay videos below are the surviving record.
+        </p>
+
+        <div className="videos-grid">
+          <div className="video-card">
+            <div className="video-embed">
+              <YouTubeEmbed videoId="fR8jzLLAoPA" title="Bullet Striker Hyper" />
+            </div>
+            <div className="video-info">
+              <h3>Bullet Striker Hyper</h3>
+              <p>Action · Unity · Shooter game with a cover system</p>
+            </div>
+          </div>
+
+          <div className="video-card">
+            <div className="video-embed">
+              <YouTubeEmbed videoId="Xfk6lLR0SMM" title="Tactics Core" />
+            </div>
+            <div className="video-info">
+              <h3>Tactics Core</h3>
+              <p>Strategy · Unity · Tactical top-down tank shooter game</p>
+            </div>
+          </div>
+
+          <div className="video-card">
+            <div className="video-embed">
+              <YouTubeEmbed videoId="BR1siK1choY" title="Galactic Survival" />
+            </div>
+            <div className="video-info">
+              <h3>Galactic Survival</h3>
+              <p>Strategy · Unity · Wave-based space survival</p>
+            </div>
+          </div>
+
+          <div className="video-card">
+            <div className="video-embed">
+              <YouTubeEmbed videoId="bkJpo61N-go" title="Fourth Game" />
+            </div>
+            <div className="video-info">
+              <h3>Fourth Game Title</h3>
+              <p>Casual · Unity · Strategy game with merge mechanics</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== Other PROJECTS ===== */}
+      <section className="about-section">
+        <h2 className="section-title">Other Projects</h2>
 
         <div className="projects-grid">
           <article className="project-card">
@@ -304,57 +356,6 @@ export default function AboutPage() {
               <p>Unity3D · Complex UI · Smooth 3D model interaction</p>
             </div>
           </article>
-        </div>
-      </section>
-
-      {/* ===== CASUAL GAME SHOWCASE ===== */}
-      <section className="about-section">
-        <h2 className="section-title">Casual Game Showcase</h2>
-        <p className="lead" style={{ marginBottom: 24 }}>
-          Four casual mobile games I built during 2024–2025. Each prototype was
-          designed, coded, and shipped within a few weeks.
-        </p>
-
-        <div className="videos-grid">
-          <div className="video-card">
-            <div className="video-embed">
-              <YouTubeEmbed videoId="fR8jzLLAoPA" title="Bullet Striker Hyper" />
-            </div>
-            <div className="video-info">
-              <h3>Bullet Striker Hyper</h3>
-              <p>Action · Unity · Wave-based shooter with cover system</p>
-            </div>
-          </div>
-
-          <div className="video-card">
-            <div className="video-embed">
-              <YouTubeEmbed videoId="Xfk6lLR0SMM" title="Tactics Core" />
-            </div>
-            <div className="video-info">
-              <h3>Tactics Core</h3>
-              <p>Strategy · Unity · Tactical puzzle mechanics</p>
-            </div>
-          </div>
-
-          <div className="video-card">
-            <div className="video-embed">
-              <YouTubeEmbed videoId="BR1siK1choY" title="Galactic Survival" />
-            </div>
-            <div className="video-info">
-              <h3>Galactic Survival</h3>
-              <p>Strategy · Unity · Wave-based space survival</p>
-            </div>
-          </div>
-
-          <div className="video-card">
-            <div className="video-embed">
-              <YouTubeEmbed videoId="bkJpo61N-go" title="Fourth Game" />
-            </div>
-            <div className="video-info">
-              <h3>Fourth Game Title</h3>
-              <p>Casual · Unity · Short description</p>
-            </div>
-          </div>
         </div>
       </section>
 
