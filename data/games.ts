@@ -1,5 +1,5 @@
 // data/games.ts
-export type Engine = 'phaser' | 'three';
+export type Engine = 'phaser' | 'three' | 'canvas';
 
 export interface GameMeta {
   slug: string;
@@ -49,13 +49,13 @@ export const games: GameMeta[] = [
     engine: 'three',
   },
   {
-    slug: 'flappy',
-    title: 'Flappy Neon',
-    description: 'Tap to fly and weave through the pillars. One button, infinite attempts.',
-    tags: ['Phaser 3', 'One-button'],
-    art: '◆',
-    cover: '/games/flappy.jpg',
-    engine: 'phaser',
+    slug: 'memory-grid',
+    title: 'Memory Grid',
+    description: 'Memorize the highlighted cells, then tap them back. Built with vanilla Canvas 2D — no engine.',
+    tags: ['Canvas 2D', 'Puzzle', 'Vanilla'],
+    art: '◉',
+    cover: '',                   // để rỗng, sẽ fallback về art
+    engine: 'canvas',
   },
 ];
 

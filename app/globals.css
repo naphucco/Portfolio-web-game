@@ -1863,3 +1863,25 @@ a {
     gap: 16px;
   }
 }
+
+/* ===== Canvas game stage (Memory Grid) ===== */
+.stage--canvas {
+  aspect-ratio: auto;
+  /* bỏ khung 16:9 */
+  overflow: visible;
+  /* cho canvas dãn tự nhiên */
+  min-height: 380px;
+  /* đủ chỗ cho cover khi chưa playing */
+}
+
+.canvas-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* KHÔNG ép width/height 100% — để JS tự set */
+.canvas-container canvas {
+  display: block;
+}
