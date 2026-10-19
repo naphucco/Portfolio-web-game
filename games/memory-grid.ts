@@ -399,35 +399,37 @@ export class MemoryGrid {
         const H = W + FOOTER_H;      // grid vuông + vùng footer
 
         // ------------------------------------------------------------
-        // TẠI SAO devicePixelRatio?
+        // TẠI SAO NHÂN DPR?
         // ------------------------------------------------------------
-        // Trên màn hình retina (MacBook, iPhone), 1 CSS pixel = 2 hoặc
-        // 3 physical pixel. Trình duyệt sẽ tự upscale canvas nếu bạn
-        // không xử lý → hình mờ.
+        // canvas.width       = số ô để vẽ → tăng thì NÉT hơn (không tràn)
+        // canvas.style.width = kích thước hiển thị → tăng thì TO hơn (có thể tràn)
         //
-        // Cách đúng: set canvas vật lý = W * dpr (số pixel thật),
-        // nhưng set style CSS = W (để layout đúng). Trình duyệt không
-        // cần upscale → hình sắc nét.
+        // Mỗi máy cần số ô khác nhau để lấp đầy cùng 1 kích thước hiển thị:
+        //   - Màn thường: 1 đơn vị hiển thị = 1 ô
+        //   - Retina/iPhone: 1 đơn vị hiển thị = 2-3 ô (ô nhỏ hơn)
         //
-        // Ví dụ màn 2x: canvas.width = 480 * 2 = 960, style.width = 480px.
-        // Nhìn bằng mắt vẫn là 480px, nhưng có 960 pixel thật để vẽ.
+        // Không nhân dpr → thiếu ô → máy phóng to ô → MỜ
+        // Nhân dpr       → đủ ô  → NÉT
+        //
+        // devicePixelRatio trả về số ô máy này cần cho 1 đơn vị hiển thị.
+        // Giá trị tùy máy (1, 1.25, 1.5, 2, 3...), không đoán trước.
+        // `|| 1` là fallback nếu browser cũ trả về 0/undefined.
+        // ------------------------------------------------------------
         const dpr = window.devicePixelRatio || 1;
-        this.canvas.width = W * dpr;
+        this.canvas.width = W * dpr;         // số ô để vẽ (nét)
         this.canvas.height = H * dpr;
-        this.canvas.style.width = W + 'px';
+        this.canvas.style.width = W + 'px';  // kích thước hiển thị (không đổi)
         this.canvas.style.height = H + 'px';
 
         // ------------------------------------------------------------
-        // TẠI SAO setTransform THAY VÌ ctx.scale?
+        // DÒNG NÀY LÀM GÌ? ma trận đơn vị
         // ------------------------------------------------------------
-        // scale(dpr, dpr) sẽ CỘNG DỒN mỗi lần gọi. Nếu resize() được gọi
-        // 3 lần, scale sẽ thành 3*dpr → canvas vẽ sai.
+        // setTransform(dpr,...) = "nhân mọi số vẽ lên dpr lần".
+        // Cần vì  canvas.width đã nhân dpr ở trên, nhưng code vẽ vẫn dùng W.
         //
-        // setTransform(dpr, 0, 0, dpr, 0, 0) RESET transform matrix về
-        // giá trị mới, không cộng dồn. An toàn khi gọi nhiều lần.
-        //
-        // Sau lệnh này, mọi lệnh vẽ (fillRect, arc, ...) đều tính theo
-        // đơn vị CSS pixel (W, H) — code vẽ không cần biết dpr là gì.
+        // Thiếu dòng này → hình nhỏ đi dpr lần. (nếu dpr != 1)
+        // Có dòng này   → hình ra đúng kích thước nhìn bằng mắt.
+        // ------------------------------------------------------------
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         this.W = W;
